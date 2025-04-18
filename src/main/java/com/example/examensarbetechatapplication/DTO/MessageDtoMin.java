@@ -1,9 +1,5 @@
 package com.example.examensarbetechatapplication.DTO;
 
-import com.example.examensarbetechatapplication.Model.ChatRoom;
-import com.example.examensarbetechatapplication.Model.ChatRoomMember;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MessageDto {
+public class MessageDtoMin {
 
     private long id;
     private String contents;
     private LocalDateTime time;
-    private ChatRoomMemberDtoMin chatRoomMemberDtoMin;
-    private ChatRoomDtoMin chatRoomDtoMin;
 }

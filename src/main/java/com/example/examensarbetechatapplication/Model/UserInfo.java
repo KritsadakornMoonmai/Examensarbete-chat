@@ -24,9 +24,15 @@ public class UserInfo {
     private String telephoneNumber;
     private ImageIcon profileImage;
 
-
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn
     private User user;
+
+    public UserInfo(String fullName, int age, String telephoneNumber, ImageIcon profileImage, User user) {
+        this.fullName = fullName;
+        this.age = age;
+        this.telephoneNumber = telephoneNumber;
+        this.profileImage = profileImage;
+        this.user = user;
+    }
 }

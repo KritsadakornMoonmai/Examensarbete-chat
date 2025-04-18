@@ -16,20 +16,24 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String username;
     private String password;
     private String email;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserInfo userInfo;
 
-    @ManyToOne
-    @JoinColumn
-    private UserRelationship userRelationship;
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<UserRelationship> relationshipInitiated;
+
+    @OneToMany(mappedBy = "friend")
+    @JsonIgnore
+    private List<UserRelationship> relationshipReceived;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     @JsonIgnore

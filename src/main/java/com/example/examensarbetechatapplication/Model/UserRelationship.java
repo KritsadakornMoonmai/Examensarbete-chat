@@ -19,11 +19,18 @@ public class UserRelationship {
     @Id
     @GeneratedValue
     private long id;
-
-    private long user_id;
-    private long receiver_id;
     private LocalDateTime relatedAt;
 
-    @OneToMany(mappedBy = "userRelationship", fetch = FetchType.EAGER)
-    private List<User> user;
+
+    @Enumerated
+    private RelationshipStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "friend_id")
+    private User friend;
+
 }

@@ -26,4 +26,8 @@ public class Message {
     @ManyToOne
     @JoinColumn
     private ChatRoomMember chatRoomMember;
+
+    @ManyToOne
+    @JoinColumn
+    private ChatRoom chatRoom;
 }

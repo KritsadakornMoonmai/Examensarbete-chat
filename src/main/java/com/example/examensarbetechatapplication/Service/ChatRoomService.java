@@ -3,7 +3,7 @@ package com.example.examensarbetechatapplication.Service;
 import com.example.examensarbetechatapplication.DTO.ChatRoomDto;
 import com.example.examensarbetechatapplication.DTO.ChatRoomDtoMin;
 import com.example.examensarbetechatapplication.Model.ChatRoom;
-import lombok.AllArgsConstructor;
+import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,9 @@ public class ChatRoomService {
 
     @Autowired
     private ChatRoomMemberService chatRoomMemberService;
+
+    @Autowired
+    private ChatRoomRepository chatRoomRepo;
 
     @Autowired
     private MessageService messageService;
@@ -34,5 +37,19 @@ public class ChatRoomService {
                 .name(chatRoom.getName())
                 .createAt(chatRoom.getCreateAt())
                 .build();
+    }
+
+    protected ChatRoom getChatRoomById(long id) {
+        return chatRoomRepo.getReferenceById(id);
+    }
+
+    public ChatRoomDto getChatRoomDtoById(long id) {
+        ChatRoom chatRoom = chatRoomRepo.getReferenceById(id);
+        return getChatRoomDto(chatRoom);
+    }
+
+    public ChatRoomDtoMin getChatRoomDtoMiniById(long id) {
+        ChatRoom chatRoom = chatRoomRepo.getReferenceById(id);
+        return getChatRoomDtoMin(chatRoom);
     }
 }

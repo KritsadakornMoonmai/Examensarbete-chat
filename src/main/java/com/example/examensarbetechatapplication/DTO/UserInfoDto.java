@@ -1,10 +1,6 @@
 package com.example.examensarbetechatapplication.DTO;
 
 
-import com.example.examensarbetechatapplication.Model.User;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

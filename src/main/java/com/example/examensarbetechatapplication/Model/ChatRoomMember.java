@@ -24,11 +24,11 @@ public class ChatRoomMember {
     private LocalDateTime joinedAt;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
     @OneToMany(mappedBy = "chatRoomMember", fetch = FetchType.EAGER)

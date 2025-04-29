@@ -25,7 +25,7 @@ public class UserInfo {
     private ImageIcon profileImage;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn
+    @JoinColumn(name = "user_id")
     private User user;
 
     public UserInfo(String fullName, int age, String telephoneNumber, ImageIcon profileImage, User user) {

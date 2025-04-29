@@ -1,5 +1,6 @@
 package com.example.examensarbetechatapplication.Service;
 
+import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserRelationshipDto;
 import com.example.examensarbetechatapplication.Model.User;
 import com.example.examensarbetechatapplication.Model.UserRelationship;
@@ -14,11 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserRelationshipService {
 
-    @Autowired
-    private UserService userService;
 
-    @Autowired
-    private UserRepository userRepo;
+    private final UserRepository userRepo;
 
     protected UserRelationshipDto getUserRelationshipDtoFull(UserRelationship relationship){
 
@@ -26,8 +24,16 @@ public class UserRelationshipService {
                 .id(relationship.getId())
                 .relatedAt(relationship.getRelatedAt())
                 .status(relationship.getStatus())
-                .user(userService.getUserDtoMin(relationship.getUser()))
-                .friend(userService.getUserDtoMin(relationship.getFriend()))
+                .user(UserDtoMin.builder()
+                        .id(relationship.getUser().getId())
+                        .username(relationship.getUser().getUsername())
+                        .email(relationship.getUser().getEmail())
+                        .build())
+                .friend(UserDtoMin.builder()
+                        .id(relationship.getFriend().getId())
+                        .username(relationship.getFriend().getUsername())
+                        .email(relationship.getFriend().getEmail())
+                        .build())
                 .build();
     }
 

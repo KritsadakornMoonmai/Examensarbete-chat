@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,15 +30,15 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<UserRelationship> relationshipInitiated;
+    private List<UserRelationship> relationshipInitiated = new ArrayList<>();
 
     @OneToMany(mappedBy = "friend")
     @JsonIgnore
-    private List<UserRelationship> relationshipReceived;
+    private List<UserRelationship> relationshipReceived = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     @JsonIgnore
-    private List<ChatRoomMember> chatRoomMember;
+    private List<ChatRoomMember> chatRoomMember = new ArrayList<>();
 
 
     public User(String username, String password, String email) {

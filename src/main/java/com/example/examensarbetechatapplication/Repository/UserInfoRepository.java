@@ -9,5 +9,4 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
 
     UserInfo getUserInfoByUser(User user);
 
-    UserInfo getUserInfoById(long id);
 }

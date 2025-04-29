@@ -1,6 +1,7 @@
 package com.example.examensarbetechatapplication.Service;
 
 import com.example.examensarbetechatapplication.DTO.UserDto;
+import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserInfoDto;
 import com.example.examensarbetechatapplication.DTO.UserInfoDtoMin;
 import com.example.examensarbetechatapplication.Model.User;
@@ -18,13 +19,12 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserInfoService {
 
-    @Autowired
-    private UserInfoRepository userInfoRepo;
+
+    private final UserInfoRepository userInfoRepo;
+
 
     private final UserRepository userRepo;
 
-
-    private final UserService userService;
 
     protected UserInfoDto getUserInfoDto(UserInfo userInfo) {
 
@@ -34,7 +34,11 @@ public class UserInfoService {
                 .age(userInfo.getAge())
                 .telephoneNumber(userInfo.getTelephoneNumber())
                 .profileImage(userInfo.getProfileImage())
-                .userDtoMin(userService.getUserDtoMin(userInfo.getUser()))
+                .userDtoMin(UserDtoMin.builder()
+                        .id(userInfo.getUser().getId())
+                        .username(userInfo.getUser().getUsername())
+                        .email(userInfo.getUser().getEmail())
+                        .build())
                 .build();
     }
 
@@ -62,20 +66,20 @@ public class UserInfoService {
 
 
     public UserInfoDto getUserInfoDtoById(long id) {
-        return getUserInfoDto(userInfoRepo.getUserInfoById(id));
+        return getUserInfoDto(userInfoRepo.findById(id).orElseThrow(() -> new RuntimeException("User info not exist")));
     }
 
     public UserInfoDtoMin getUserInfoDtoMinById(long id) {
-        return getUserInfoDtoMin(userInfoRepo.getUserInfoById(id));
+        return getUserInfoDtoMin(userInfoRepo.findById(id).orElseThrow(() -> new RuntimeException("User info not exist")));
     }
 
     public UserInfoDto getUserInfoByUserDto(UserDto userDto) {
-        User getUser = userService.getUserFromUserDto(userDto);
-        return getUserInfoDto(userInfoRepo.getUserInfoByUser(getUser));
+        return getUserInfoDto(userInfoRepo.getUserInfoByUser(userRepo.findById(userDto.getId())
+                .orElseThrow(() -> new RuntimeException("User info not found"))));
     }
 
     public List<UserInfoDto> getUserInfoDtoByName(String name) {
-        List<UserInfo> userInfoList = userInfoRepo.findAll().stream().filter(userInfo -> !Objects.equals(userInfo.getFullName(), name)).toList();
+        List<UserInfo> userInfoList = userInfoRepo.findAll().stream().filter(userInfo -> Objects.equals(userInfo.getFullName(), name)).toList();
 
         return userInfoList.stream().map(this::getUserInfoDto).toList();
     }

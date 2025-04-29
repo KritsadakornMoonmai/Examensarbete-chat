@@ -1,7 +1,9 @@
 package com.example.examensarbetechatapplication.Service;
 
+import com.example.examensarbetechatapplication.DTO.ChatRoomDtoMin;
 import com.example.examensarbetechatapplication.DTO.ChatRoomMemberDto;
 import com.example.examensarbetechatapplication.DTO.ChatRoomMemberDtoMin;
+import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.Message;
 import com.example.examensarbetechatapplication.Repository.ChatRoomMemberRepository;
@@ -24,20 +26,22 @@ public class ChatRoomMemberService {
     private final ChatRoomMemberRepository chatRoomMemberRepo;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private ChatRoomService chatRoomService;
-
-    @Autowired
     private MessageService messageService;
 
     protected ChatRoomMemberDto getChatMemberDto(ChatRoomMember chatRoomMember) {
         return ChatRoomMemberDto.builder()
                 .id(chatRoomMember.getId())
                 .joinedAt(chatRoomMember.getJoinedAt())
-                .userDtoMin(userService.getUserDtoMin(chatRoomMember.getUser()))
-                .chatRoomDtoMin(chatRoomService.getChatRoomDtoMin(chatRoomMember.getChatRoom()))
+                .userDtoMin(UserDtoMin.builder()
+                        .id(chatRoomMember.getUser().getId())
+                        .username(chatRoomMember.getUser().getUsername())
+                        .email(chatRoomMember.getUser().getEmail())
+                        .build())
+                .chatRoomDtoMin(ChatRoomDtoMin.builder()
+                        .id(chatRoomMember.getChatRoom().getId())
+                        .name(chatRoomMember.getChatRoom().getName())
+                        .createAt(chatRoomMember.getChatRoom().getCreateAt())
+                        .build())
                 .messageDtoMins(chatRoomMember.getMessages().stream().map(message -> messageService.getMessageDtoMin(message)).toList())
                 .roles(chatRoomMember.getRoles())
                 .build();

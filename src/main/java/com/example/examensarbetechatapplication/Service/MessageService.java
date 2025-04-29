@@ -7,6 +7,8 @@ import com.example.examensarbetechatapplication.DTO.MessageDtoMin;
 import com.example.examensarbetechatapplication.Model.ChatRoom;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.Message;
+import com.example.examensarbetechatapplication.Repository.ChatRoomMemberRepository;
+import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
 import com.example.examensarbetechatapplication.Repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +22,27 @@ public class MessageService {
     MessageRepository messageRepo;
 
     @Autowired
-    private ChatRoomService chatRoomService;
+    ChatRoomRepository chatRoomRepo;
 
     @Autowired
-    private ChatRoomMemberService chatRoomMemberService;
+    ChatRoomMemberRepository chatRoomMemberRepo;
+
 
     protected MessageDto getMessageDto(Message message) {
         return MessageDto.builder()
                 .id(message.getId())
                 .contents(message.getContents())
                 .time(message.getTime())
-                .chatRoomMemberDtoMin(chatRoomMemberService.getChatMemberDtoMin(message.getChatRoomMember()))
-                .chatRoomDtoMin(chatRoomService.getChatRoomDtoMin(message.getChatRoom()))
+                .chatRoomMemberDtoMin(ChatRoomMemberDtoMin.builder()
+                        .id(message.getChatRoomMember().getId())
+                        .joinedAt(message.getChatRoomMember().getJoinedAt())
+                        .roles(message.getChatRoomMember().getRoles())
+                        .build())
+                .chatRoomDtoMin(ChatRoomDtoMin.builder()
+                        .id(message.getChatRoom().getId())
+                        .name(message.getChatRoom().getName())
+                        .createAt(message.getChatRoom().getCreateAt())
+                        .build())
                 .build();
     }
 
@@ -48,8 +59,8 @@ public class MessageService {
                 .id(messageDto.getId())
                 .contents(messageDto.getContents())
                 .time(messageDto.getTime())
-                .chatRoomMember(chatRoomMemberService.getChatRoomMemberById(messageDto.getChatRoomMemberDtoMin().getId()))
-                .chatRoom(chatRoomService.getChatRoomById(messageDto.getChatRoomDtoMin().getId()))
+                .chatRoomMember(chatRoomMemberRepo.getReferenceById(messageDto.getChatRoomMemberDtoMin().getId()))
+                .chatRoom(chatRoomRepo.getReferenceById(messageDto.getChatRoomDtoMin().getId()))
                 .build();
     }
 
@@ -58,8 +69,8 @@ public class MessageService {
     }
 
     public MessageDto getMessageHandler(ChatRoomMemberDtoMin CRMDMini, ChatRoomDtoMin CRDMini) {
-        ChatRoomMember chatRoomMember = chatRoomMemberService.getChatRoomMemberById(CRMDMini.getId());
-        ChatRoom chatRoom = chatRoomService.getChatRoomById(CRDMini.getId());
+        ChatRoomMember chatRoomMember = chatRoomMemberRepo.getReferenceById(CRMDMini.getId());
+        ChatRoom chatRoom = chatRoomRepo.getReferenceById(CRDMini.getId());
 
         return getMessageByOwnerAndChatRoom(chatRoomMember, chatRoom);
     }

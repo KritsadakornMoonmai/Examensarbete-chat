@@ -3,6 +3,7 @@ package com.example.examensarbetechatapplication.Service;
 import com.example.examensarbetechatapplication.DTO.UserDto;
 import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserInfoDto;
+import com.example.examensarbetechatapplication.DTO.UserInfoDtoMin;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.User;
 import com.example.examensarbetechatapplication.Model.UserInfo;
@@ -10,6 +11,7 @@ import com.example.examensarbetechatapplication.Model.UserRelationship;
 import com.example.examensarbetechatapplication.Repository.UserInfoRepository;
 import com.example.examensarbetechatapplication.Repository.UserRelationshipRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,50 +19,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    UserRepository userRepo;
 
-    @Autowired
-    UserInfoRepository userInfoRepo;
+    final private UserRepository userRepo;
+    final private UserInfoRepository userInfoRepo;
 
-    @Autowired
-    UserRelationshipRepository userRelationshipRepo;
+    final private UserInfoService userInfoService;
 
-    @Autowired
-    UserInfoService userInfoService;
+    final private UserRelationshipService userRelationshipService;
 
-    @Autowired
-    UserRelationshipService userRelationshipService;
-
-    @Autowired
-    ChatRoomMemberService chatRoomMemberService;
+    final private ChatRoomMemberService chatRoomMemberService;
 
     protected UserDto getUserDto(User user) {
+
+        System.out.println("UserInfoID: "+user.getUserInfo().getId());
+        UserInfoDtoMin userInfoDtoMin = new UserInfoDtoMin(
+                user.getUserInfo().getId(),
+                user.getUserInfo().getFullName(),
+                user.getUserInfo().getTelephoneNumber()
+        );
 
         return UserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .email(user.getEmail())
-                .userInfoDtoMin(userInfoService.getUserInfoDtoMin(user.getUserInfo()))
+                .userInfoDtoMin(userInfoDtoMin)
                 .relationshipInitiatedDtos(
                         user.getRelationshipInitiated()
                                 .stream()
-                                .map(userRelationship -> userRelationshipService.getUserRelationshipDtoFull(userRelationship))
+                                .map(userRelationshipService::getUserRelationshipDtoFull)
                                 .toList()
                 )
                 .relationshipReceivedDtos(
                         user.getRelationshipReceived()
                                 .stream()
-                                .map(userRelationship -> userRelationshipService.getUserRelationshipDtoFull(userRelationship))
+                                .map(userRelationshipService::getUserRelationshipDtoFull)
                                 .toList()
                 )
                 .chatRoomMemberDtoMins(
                         user.getChatRoomMember()
                                 .stream()
-                                .map(member -> chatRoomMemberService.getChatMemberDtoMin(member))
+                                .map(chatRoomMemberService::getChatMemberDtoMin)
                                 .toList()
                 )
                 .build();
@@ -76,22 +78,23 @@ public class UserService {
     }
 
     protected User getUserFromUserDto(UserDto userDto) {
+        System.out.println("UserDto UserInfo Id: "+userDto.getUserInfoDtoMin().getId());
         UserInfo userInfo = userInfoRepo.findById(userDto.getUserInfoDtoMin().getId())
                 .orElseThrow(() -> new RuntimeException("User Info not found"));
 
         List<UserRelationship> initiatedList = userDto.getRelationshipInitiatedDtos()
                 .stream()
-                .map(relationshipDto -> userRelationshipService.getUserRelationshipFromDto(relationshipDto))
+                .map(userRelationshipService::getUserRelationshipFromDto)
                 .toList();
 
         List<UserRelationship> receivedList = userDto.getRelationshipReceivedDtos()
                 .stream()
-                .map(relationshipDto -> userRelationshipService.getUserRelationshipFromDto(relationshipDto))
+                .map(userRelationshipService::getUserRelationshipFromDto)
                 .toList();
 
         List<ChatRoomMember> chatRoomMembers = userDto.getChatRoomMemberDtoMins()
                 .stream()
-                .map(memberDtoMin -> chatRoomMemberService.getChatRoomMemberFromDtoMini(memberDtoMin))
+                .map(chatRoomMemberService::getChatRoomMemberFromDtoMini)
                 .toList();
 
         return User.builder()
@@ -110,28 +113,17 @@ public class UserService {
         return userRepo.findAll().stream().map(this::getUserDto).toList();
     }
 
-    public User getUserById(long id) {
-        return userRepo.getReferenceById(id);
-    }
-
-    public User getUserFromUserDtoPub(UserDto userDto) {
-        return getUserFromUserDto(userDto);
-    }
-
     public UserDto getUserDtoById(long id) {
-        return getUserDto(userRepo.getReferenceById(id));
-    }
-
-    public UserDtoMin getUserDtoMinById(long id) {
-        return getUserDtoMin(userRepo.getReferenceById(id));
+        User user = userRepo.findById(id).orElseThrow(() ->new RuntimeException("User not found"));
+        return getUserDto(user);
     }
 
     public UserDto getUserDtoByUsername(String username) {
-        return getUserDto(userRepo.getUserByUsername(username));
+        return getUserDto(userRepo.findByUsername(username));
     }
 
     public UserDtoMin getUserDtoMinByUsername(String username) {
-        return getUserDtoMin(userRepo.getUserByUsername(username));
+        return getUserDtoMin(userRepo.findByUsername(username));
     }
 
     public List<UserDto> getUserByUserInfoFullName(String fullname) {

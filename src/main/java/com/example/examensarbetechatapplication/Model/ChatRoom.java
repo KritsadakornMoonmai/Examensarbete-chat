@@ -1,5 +1,6 @@
 package com.example.examensarbetechatapplication.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,9 +25,11 @@ public class ChatRoom {
     private LocalDateTime createAt;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<ChatRoomMember> chatRoomMembers;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Message> messages;
 
     public ChatRoom(String name, LocalDateTime createAt) {

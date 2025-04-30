@@ -133,7 +133,7 @@ class MessageServiceTest {
 
         messageService = new MessageService(messageRepository, chatRoomRepository, chatRoomMemberRepository);
         chatRoomMemberService = new ChatRoomMemberService(userRepository, chatRoomRepository, messageRepository, chatRoomMemberRepository);
-        chatRoomService = new ChatRoomService(chatRoomRepository,chatRoomMemberService, messageService);
+        chatRoomService = new ChatRoomService(chatRoomRepository,chatRoomMemberRepository, messageRepository);
 
 
 

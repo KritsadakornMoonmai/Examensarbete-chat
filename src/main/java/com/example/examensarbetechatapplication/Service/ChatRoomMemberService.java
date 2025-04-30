@@ -1,9 +1,6 @@
 package com.example.examensarbetechatapplication.Service;
 
-import com.example.examensarbetechatapplication.DTO.ChatRoomDtoMin;
-import com.example.examensarbetechatapplication.DTO.ChatRoomMemberDto;
-import com.example.examensarbetechatapplication.DTO.ChatRoomMemberDtoMin;
-import com.example.examensarbetechatapplication.DTO.UserDtoMin;
+import com.example.examensarbetechatapplication.DTO.*;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.Message;
 import com.example.examensarbetechatapplication.Repository.ChatRoomMemberRepository;
@@ -25,9 +22,6 @@ public class ChatRoomMemberService {
     private final MessageRepository messageRepo;
     private final ChatRoomMemberRepository chatRoomMemberRepo;
 
-    @Autowired
-    private MessageService messageService;
-
     protected ChatRoomMemberDto getChatMemberDto(ChatRoomMember chatRoomMember) {
         return ChatRoomMemberDto.builder()
                 .id(chatRoomMember.getId())
@@ -42,7 +36,14 @@ public class ChatRoomMemberService {
                         .name(chatRoomMember.getChatRoom().getName())
                         .createAt(chatRoomMember.getChatRoom().getCreateAt())
                         .build())
-                .messageDtoMins(chatRoomMember.getMessages().stream().map(message -> messageService.getMessageDtoMin(message)).toList())
+                .messageDtoMins(chatRoomMember.getMessages()
+                        .stream()
+                        .map(message -> MessageDtoMin.builder()
+                                .id(message.getId())
+                                .contents(message.getContents())
+                                .time(message.getTime())
+                                .build())
+                .toList())
                 .roles(chatRoomMember.getRoles())
                 .build();
     }

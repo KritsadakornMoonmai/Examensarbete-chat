@@ -3,7 +3,9 @@ package com.example.examensarbetechatapplication.Service;
 import com.example.examensarbetechatapplication.DTO.*;
 import com.example.examensarbetechatapplication.Model.ChatRoom;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
+import com.example.examensarbetechatapplication.Repository.ChatRoomMemberRepository;
 import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
+import com.example.examensarbetechatapplication.Repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,9 @@ import org.springframework.stereotype.Service;
 public class ChatRoomService {
 
 
-    private final ChatRoomRepository chatRoomRepo;
-    private final ChatRoomMemberService chatRoomMemberService;
-    private final MessageService messageService;
+    final private ChatRoomRepository chatRoomRepo;
+    final private ChatRoomMemberRepository chatRoomMemberRepo;
+    final private MessageRepository messageRepo;
 
     protected ChatRoomDto getChatRoomDto(ChatRoom chatRoom) {
         return ChatRoomDto.builder()
@@ -50,21 +52,25 @@ public class ChatRoomService {
         return getChatRoomDtoMin(chatRoom);
     }
 
-    public void saveChatRoom(ChatRoomDto chatRoomDto) {
-        ChatRoom newChatRoom = ChatRoom.builder()
+    public ChatRoom getChatRoomFromDto(ChatRoomDto chatRoomDto) {
+        return ChatRoom.builder()
                 .id(chatRoomDto.getId())
                 .name(chatRoomDto.getName())
                 .createAt(chatRoomDto.getCreateAt())
                 .chatRoomMembers(chatRoomDto.getChatRoomMemberDtoMins()
                         .stream()
-                        .map(chatRoomMember -> chatRoomMemberService.getChatRoomMemberById(chatRoomMember.getId()))
+                        .map(chatRoomMember -> chatRoomMemberRepo.getReferenceById(chatRoomMember.getId()))
                         .toList())
                 .messages(chatRoomDto.getMessageDtoMins()
                         .stream()
-                        .map(messageDtoMin -> messageService.getMessageById(messageDtoMin.getId()))
+                        .map(messageDtoMin -> messageRepo.getReferenceById(messageDtoMin.getId()))
                         .toList())
                 .build();
+    }
 
+    public void saveChatRoom(ChatRoomDto chatRoomDto) {
+        ChatRoom newChatRoom = getChatRoomFromDto(chatRoomDto);
+        System.out.println("newChatRoom saving " + newChatRoom.getName());
         chatRoomRepo.save(newChatRoom);
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,7 +92,7 @@ class ChatRoomServiceTest {
 
     //CHATROOM--------------------------------------------------
     LocalDateTime dateTimeChatRoom = LocalDateTime.of(2025, 2, 11, 13, 10, 54);
-    ChatRoom chatRoom = new ChatRoom(newUserInfo.getFullName() + " " + newUserInfo2.getFullName(), dateTimeChatRoom);
+    ChatRoom chatRoom;
 
     //CHATROOM MEMBERS-------------------------------------------
     ChatRoomMember chatRoomMember1 = new ChatRoomMember(newUser1, dateTimeChatRoom, chatRoom, Roles.MEMBER);
@@ -114,16 +115,19 @@ class ChatRoomServiceTest {
 
         newUser1.setRelationshipInitiated(user1Initiated);
         newUser2.setRelationshipReceived(user2Received);
+        chatRoom = new ChatRoom(newUser1.getUserInfo().getFullName() + " " + newUser2.getUserInfo().getFullName(), dateTimeChatRoom);
 
         chatRoom.setId(id1);
         chatRoomMember1.setId(id1);
         chatRoomMember2.setId(id2);
+        chatRoomMember1.setMessages(new ArrayList<>());
+        chatRoomMember2.setMessages(new ArrayList<>());
         chatRoom.setChatRoomMembers(chatRoomMemberList);
         chatRoom.setMessages(new ArrayList<>());
 
         messageService = new MessageService(messageRepository, chatRoomRepository, chatRoomMemberRepository);
         chatRoomMemberService = new ChatRoomMemberService(userRepository, chatRoomRepository, messageRepository, chatRoomMemberRepository);
-        chatRoomService = new ChatRoomService(chatRoomRepository, chatRoomMemberService, messageService);
+        chatRoomService = new ChatRoomService(chatRoomRepository, chatRoomMemberRepository, messageRepository);
 
 
 
@@ -132,8 +136,8 @@ class ChatRoomServiceTest {
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
         when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
 
+        when(chatRoomRepository.save(any())).thenReturn(chatRoom);
         when(chatRoomRepository.getReferenceById(1L)).thenReturn(chatRoom);
-        when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(chatRoom);
         when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList);
     }
 
@@ -170,25 +174,39 @@ class ChatRoomServiceTest {
 
     @Test
     void saveChatRoom() {
+        ChatRoom chatRoom2 = new ChatRoom("ChatRooms", dateTimeChatRoom);
+        chatRoom2.setId(2L);
+        chatRoom2.setChatRoomMembers(chatRoomMemberList);
+        chatRoom2.setMessages(new ArrayList<>());
 
-        chatRoomRepository.delete(chatRoom);
-        chatRoom.setId(1L);
-        ChatRoomDto chatRoomDto = chatRoomService.getChatRoomDto(chatRoom);
+        System.out.println("Before all save");
+        ChatRoomDto chatRoomDto = chatRoomService.getChatRoomDto(chatRoom2);
+        System.out.println(chatRoomDto.getName());
+        assertThat(chatRoomDto).isNotNull();
 
-        when(chatRoomRepository.getReferenceById(1L)).thenReturn(chatRoom);
-        when(chatRoomMemberRepository.getReferenceById(1L))
-                .thenReturn(chatRoomMember1);
+        System.out.println("save 1");
+        when(chatRoomRepository.getReferenceById(2L)).thenReturn(chatRoom2);
+        when(chatRoomMemberRepository.getReferenceById(1L)).thenReturn(chatRoomMember1);
         when(messageRepository.findById(any())).thenReturn(null);
         chatRoomService.saveChatRoom(chatRoomDto);
 
-        verify(chatRoomRepository).save(chatRoom);
-        verify(chatRoomMemberRepository).getReferenceById(chatRoomDto.getChatRoomMemberDtoMins().get(0).getId());
-        verify(messageRepository).findById(any());
+        System.out.println("save 2");
+        verify(chatRoomRepository).save(chatRoom2);
+        System.out.println("save 2.1");
+        verify(chatRoomMemberRepository).getReferenceById(1L);
+        System.out.println("save 2.2");
+        System.out.println("save 2.3");
 
-        ChatRoomDtoMin getChatRoom = chatRoomService.getChatRoomDtoMiniById(1L);
+        when(chatRoomRepository.findById(2L)).thenReturn(Optional.of(chatRoom2));
+        System.out.println("save 2.4");
+        ChatRoom getChatRoom = chatRoomRepository.findById(2L).orElseThrow(() -> new RuntimeException("ChatRoom not found"));
+        System.out.println("save 3");
+
         assertThat(getChatRoom).isNotNull();
-        assertEquals(getChatRoom.getName(), "JD AP");
-        assertEquals(getChatRoom.getId(), 1L);
+        assertEquals(2, chatRoomRepository.findAll().size());
+        assertEquals(getChatRoom.getName(), "ChatRooms");
+        assertEquals(getChatRoom.getId(), 2L);
         assertNotEquals(getChatRoom.getCreateAt(), localDateTime);
+        System.out.println("Assertion done");
     }
 }

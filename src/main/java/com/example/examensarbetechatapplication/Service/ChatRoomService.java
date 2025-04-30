@@ -1,8 +1,8 @@
 package com.example.examensarbetechatapplication.Service;
 
-import com.example.examensarbetechatapplication.DTO.ChatRoomDto;
-import com.example.examensarbetechatapplication.DTO.ChatRoomDtoMin;
+import com.example.examensarbetechatapplication.DTO.*;
 import com.example.examensarbetechatapplication.Model.ChatRoom;
+import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 public class ChatRoomService {
 
 
-    private final ChatRoomMemberService chatRoomMemberService;
-
     private final ChatRoomRepository chatRoomRepo;
-
+    private final ChatRoomMemberService chatRoomMemberService;
     private final MessageService messageService;
 
     protected ChatRoomDto getChatRoomDto(ChatRoom chatRoom) {
@@ -24,8 +22,17 @@ public class ChatRoomService {
                 .id(chatRoom.getId())
                 .createAt(chatRoom.getCreateAt())
                 .name(chatRoom.getName())
-                .chatRoomMemberDtoMins(chatRoom.getChatRoomMembers().stream().map(member -> chatRoomMemberService.getChatMemberDtoMin(member)).toList())
-                .messageDtoMins(chatRoom.getMessages().stream().map(message -> messageService.getMessageDtoMin(message)).toList())
+                .chatRoomMemberDtoMins(chatRoom.getChatRoomMembers().stream().map(member -> ChatRoomMemberDtoMin.builder()
+                        .id(member.getId())
+                        .joinedAt(member.getJoinedAt())
+                        .roles(member.getRoles())
+                        .build())
+                        .toList())
+                .messageDtoMins(chatRoom.getMessages().stream().map(message -> MessageDtoMin.builder()
+                        .id(message.getId())
+                        .contents(message.getContents())
+                        .time(message.getTime())
+                        .build()).toList())
                 .build();
     }
 
@@ -37,17 +44,27 @@ public class ChatRoomService {
                 .build();
     }
 
-    protected ChatRoom getChatRoomById(long id) {
-        return chatRoomRepo.getReferenceById(id);
-    }
-
-    public ChatRoomDto getChatRoomDtoById(long id) {
-        ChatRoom chatRoom = chatRoomRepo.getReferenceById(id);
-        return getChatRoomDto(chatRoom);
-    }
 
     public ChatRoomDtoMin getChatRoomDtoMiniById(long id) {
         ChatRoom chatRoom = chatRoomRepo.getReferenceById(id);
         return getChatRoomDtoMin(chatRoom);
+    }
+
+    public void saveChatRoom(ChatRoomDto chatRoomDto) {
+        ChatRoom newChatRoom = ChatRoom.builder()
+                .id(chatRoomDto.getId())
+                .name(chatRoomDto.getName())
+                .createAt(chatRoomDto.getCreateAt())
+                .chatRoomMembers(chatRoomDto.getChatRoomMemberDtoMins()
+                        .stream()
+                        .map(chatRoomMember -> chatRoomMemberService.getChatRoomMemberById(chatRoomMember.getId()))
+                        .toList())
+                .messages(chatRoomDto.getMessageDtoMins()
+                        .stream()
+                        .map(messageDtoMin -> messageService.getMessageById(messageDtoMin.getId()))
+                        .toList())
+                .build();
+
+        chatRoomRepo.save(newChatRoom);
     }
 }

@@ -78,6 +78,10 @@ public class MessageService {
         return getMessageDto(getMessage);
     }
 
+    public Message getMessageById(long id) {
+        return messageRepo.findById(id).orElseThrow(() -> new RuntimeException("Message not found"));
+    }
+
     public void saveMessage(MessageDto messageDto) {
         Message message = getMessageFromDto(messageDto);
         messageRepo.save(message);

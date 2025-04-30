@@ -133,7 +133,7 @@ class MessageServiceTest {
 
         messageService = new MessageService(messageRepository, chatRoomRepository, chatRoomMemberRepository);
         chatRoomMemberService = new ChatRoomMemberService(userRepository, chatRoomRepository, messageRepository, chatRoomMemberRepository);
-        chatRoomService = new ChatRoomService(chatRoomMemberService, chatRoomRepository, messageService);
+        chatRoomService = new ChatRoomService(chatRoomRepository,chatRoomMemberService, messageService);
 
 
 
@@ -204,11 +204,16 @@ class MessageServiceTest {
         Message message3 = new Message("Good to hear!", dateTimeMessage3, chatRoomMember1, chatRoom);
         message3.setId(3L);
         MessageDto messageDto = messageService.getMessageDto(message3);
+        when(chatRoomMemberRepository.getReferenceById(1L)).thenReturn(chatRoomMember1);
+        when(chatRoomRepository.getReferenceById(1L)).thenReturn(chatRoom);
         messageService.saveMessage(messageDto);
 
         verify(messageRepository).save(message3);
 
+        when(messageRepository.findById(3L)).thenReturn(Optional.of(message3));
         Message fetchMessage = messageRepository.findById(3L).orElseThrow(() -> new RuntimeException("Message not found"));
+
+        verify(messageRepository).findById(3L);
 
         System.out.println("Test process");
         assertThat(fetchMessage).isNotNull();

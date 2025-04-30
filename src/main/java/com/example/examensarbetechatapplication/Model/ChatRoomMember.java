@@ -31,7 +31,7 @@ public class ChatRoomMember {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    @OneToMany(mappedBy = "chatRoomMember", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chatRoomMember")
     @JsonIgnore
     private List<Message> messages;
 

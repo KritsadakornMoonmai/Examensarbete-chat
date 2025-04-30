@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -174,26 +175,39 @@ class ChatRoomServiceTest {
 
     @Test
     void saveChatRoom() {
-        ChatRoom chatRoom2 = new ChatRoom("ChatRooms", dateTimeChatRoom);
+        LocalDateTime dateTimeChatRoom2 = LocalDateTime.of(2025, 2, 12, 9, 34, 8);
+        ChatRoom chatRoom2 = new ChatRoom("ChatRooms", dateTimeChatRoom2);
         chatRoom2.setId(2L);
-        chatRoom2.setChatRoomMembers(chatRoomMemberList);
-        chatRoom2.setMessages(new ArrayList<>());
+
+        ChatRoomMember chatRoomMember3 = new ChatRoomMember(newUser1, dateTimeChatRoom2, chatRoom2, Roles.ADMIN);
+        ChatRoomMember chatRoomMember4 = new ChatRoomMember(newUser2, dateTimeChatRoom2, chatRoom2, Roles.MEMBER);
+        chatRoomMember3.setId(3L);
+        chatRoomMember4.setId(4L);
+        List<ChatRoomMember> chatRoomMemberList2 = List.of(chatRoomMember3 , chatRoomMember4);
+        chatRoom2.setChatRoomMembers(chatRoomMemberList2);
+
+
+        when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList2);
+        //chatRoom2.setChatRoomMembers(new ArrayList<>());
 
         System.out.println("Before all save");
         ChatRoomDto chatRoomDto = chatRoomService.getChatRoomDto(chatRoom2);
-        System.out.println(chatRoomDto.getName());
         assertThat(chatRoomDto).isNotNull();
 
         System.out.println("save 1");
         when(chatRoomRepository.getReferenceById(2L)).thenReturn(chatRoom2);
-        when(chatRoomMemberRepository.getReferenceById(1L)).thenReturn(chatRoomMember1);
+        when(chatRoomMemberRepository.getReferenceById(3L)).thenReturn(chatRoomMember3);
+        when(chatRoomMemberRepository.getReferenceById(4L)).thenReturn(chatRoomMember4);
         when(messageRepository.findById(any())).thenReturn(null);
+        when(chatRoomRepository.save(any())).thenReturn(chatRoom2);
+
         chatRoomService.saveChatRoom(chatRoomDto);
 
         System.out.println("save 2");
         verify(chatRoomRepository).save(chatRoom2);
         System.out.println("save 2.1");
-        verify(chatRoomMemberRepository).getReferenceById(1L);
+        verify(chatRoomMemberRepository).getReferenceById(3L);
+        verify(chatRoomMemberRepository).getReferenceById(4L);
         System.out.println("save 2.2");
         System.out.println("save 2.3");
 
@@ -202,6 +216,7 @@ class ChatRoomServiceTest {
         ChatRoom getChatRoom = chatRoomRepository.findById(2L).orElseThrow(() -> new RuntimeException("ChatRoom not found"));
         System.out.println("save 3");
 
+        when(chatRoomRepository.findAll()).thenReturn(List.of(chatRoom, chatRoom2));
         assertThat(getChatRoom).isNotNull();
         assertEquals(2, chatRoomRepository.findAll().size());
         assertEquals(getChatRoom.getName(), "ChatRooms");

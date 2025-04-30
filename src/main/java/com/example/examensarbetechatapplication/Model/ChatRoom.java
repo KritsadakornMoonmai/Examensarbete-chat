@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,13 +25,13 @@ public class ChatRoom {
     private String name;
     private LocalDateTime createAt;
 
-    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chatRoom")
     @JsonIgnore
     private List<ChatRoomMember> chatRoomMembers;
 
-    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chatRoom")
     @JsonIgnore
-    private List<Message> messages;
+    private List<Message> messages = new ArrayList<>();
 
     public ChatRoom(String name, LocalDateTime createAt) {
         this.name = name;

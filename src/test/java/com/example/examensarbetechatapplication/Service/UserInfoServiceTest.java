@@ -1,7 +1,6 @@
 package com.example.examensarbetechatapplication.Service;
 
 import com.example.examensarbetechatapplication.DTO.UserDto;
-import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserInfoDto;
 import com.example.examensarbetechatapplication.DTO.UserInfoDtoMin;
 import com.example.examensarbetechatapplication.Model.RelationshipStatus;
@@ -27,7 +26,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

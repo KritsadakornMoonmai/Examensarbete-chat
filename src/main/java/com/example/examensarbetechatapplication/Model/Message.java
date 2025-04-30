@@ -30,4 +30,11 @@ public class Message {
     @ManyToOne
     @JoinColumn
     private ChatRoom chatRoom;
+
+    public Message(String contents, LocalDateTime time, ChatRoomMember chatRoomMember, ChatRoom chatRoom) {
+        this.contents = contents;
+        this.time = time;
+        this.chatRoomMember = chatRoomMember;
+        this.chatRoom = chatRoom;
+    }
 }

@@ -28,4 +28,9 @@ public class ChatRoom {
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER)
     private List<Message> messages;
+
+    public ChatRoom(String name, LocalDateTime createAt) {
+        this.name = name;
+        this.createAt = createAt;
+    }
 }

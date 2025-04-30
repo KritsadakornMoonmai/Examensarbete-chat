@@ -18,14 +18,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MessageService {
 
-    @Autowired
-    MessageRepository messageRepo;
 
-    @Autowired
-    ChatRoomRepository chatRoomRepo;
+    private final MessageRepository messageRepo;
 
-    @Autowired
-    ChatRoomMemberRepository chatRoomMemberRepo;
+    private final ChatRoomRepository chatRoomRepo;
+
+    private final ChatRoomMemberRepository chatRoomMemberRepo;
 
 
     protected MessageDto getMessageDto(Message message) {

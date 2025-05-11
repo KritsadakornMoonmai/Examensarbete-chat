@@ -285,70 +285,11 @@
     });
 </script>
 <script th:if="${chatRoom != null}">
-
     let chatRoomId = [[${chatRoom.id}]];
     let senderId = [[${sender.id}]];
     let username = [[${sender.getUserDtoMin().getUsername()}]];
-    let stompClient = null;
-
-    function connect() {
-        if (typeof chatRoomId === 'undefined' || typeof senderId === 'undefined') {
-            console.error("ChatRoomId or SenderId is not defined.");
-            alert("Unable to load chat. Please try again.");
-            return;
-        }
-
-        const socket = new SockJS('/ws'); // Initialize WebSocket
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/chatroom/' + chatRoomId, function (message) {
-                showMessage(JSON.parse(message.body));
-            });
-        });
-    }
-
-    function sendMessage(event) {
-        event.preventDefault(); // Prevent the page from refreshing
-        const content = document.getElementById('chat-input').value;
-
-        if (content && stompClient) {
-            const chatMessage = {
-                contents: content,
-                chatRoomDtoMin: { id: chatRoomId },
-                chatRoomMemberDtoMin: { id: senderId }
-            };
-            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-            document.getElementById('chat-input').value = ''; // Clear the input field
-        }
-    }
-
-    function showMessage(message) {
-        const messageArea = document.getElementById('chat-display');
-        const messageElement = document.createElement('div');
-
-        const isSender = message.chatRoomMemberDtoMin.id === senderId;
-        const senderUsername = isSender ? username : 'Other User';
-
-        messageElement.textContent = senderUsername + ": " + message.contents;
-
-        // Apply styles
-        if (isSender) {
-            messageElement.style.textAlign = 'right';
-            messageElement.style.backgroundColor = '#dcf8c6';
-        } else {
-            messageElement.style.textAlign = 'left';
-            messageElement.style.backgroundColor = '#e1f0ff';
-        }
-
-        messageElement.style.padding = '10px';
-        messageElement.style.margin = '5px';
-        messageElement.style.borderRadius = '10px';
-        messageArea.appendChild(messageElement);
-    }
-
-    window.onload = connect;
 </script>
+<script th:if="${chatRoom != null}" src="/script/mainPageHandler.js" defer></script>
 <script>
     var dropdown = document.getElementsByClassName("dropbtn");
     var i;

@@ -246,8 +246,8 @@
             </div>
 
         </nav>
-        <div th:if="${isChatRoomExist} != null" class="main-chat" th:insert="~{chat :: content}"></div>
-        <p th:if="${isChatRoomExist} == null" class="blank-space-message main-chat">Find a friend to talk with :)</p>
+        <div th:if="${chatRoom != null}" class="main-chat" th:insert="~{chat :: content}"></div>
+        <p th:if="${chatRoom == null}" class="blank-space-message main-chat">Find a friend to talk with :)</p>
     </div>
 </div>
 
@@ -284,12 +284,6 @@
         });
     });
 </script>
-<script th:if="${chatRoom != null}">
-    let chatRoomId = [[${chatRoom.id}]];
-    let senderId = [[${sender.id}]];
-    let username = [[${sender.getUserDtoMin().getUsername()}]];
-</script>
-<script th:if="${chatRoom != null}" src="/script/mainPageHandler.js" defer></script>
 <script>
     var dropdown = document.getElementsByClassName("dropbtn");
     var i;

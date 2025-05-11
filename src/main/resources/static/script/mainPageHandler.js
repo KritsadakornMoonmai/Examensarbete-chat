@@ -27,6 +27,11 @@ function sendMessage(event) {
     }
 }
 
+
+window.onload = function() {
+    connect(); // Initialize WebSocket connection
+};
+
 function showMessage(message) {
     const messageArea = document.getElementById('chat-display');
     const messageElement = document.createElement('div');

@@ -32,7 +32,7 @@ public class ExamensarbeteChatApplication {
         SpringApplication.run(ExamensarbeteChatApplication.class, args);
     }
 
-    /*@Bean
+    @Bean
     public CommandLineRunner runner(UserRepository userRepo,
                                     UserRelationshipRepository userRelatonRepo,
                                     UserInfoRepository userInfoRepo,
@@ -87,6 +87,6 @@ public class ExamensarbeteChatApplication {
             userInfoRepo.saveAll(List.of(newUserInfo, newUserInfo2));
             userRelatonRepo.saveAll(List.of(userRelationship, userRelationship2));
         };
-    }*/
+    }
 
 }

@@ -119,7 +119,7 @@ class UserInfoServiceTest {
                 , userRelationshipService
                 , chatRoomMemberService);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
+        /*when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
         when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
@@ -131,7 +131,7 @@ class UserInfoServiceTest {
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
         when(userInfoRepository.findAll()).thenReturn(userInfoList);
 
-        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
+        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);*/
     }
 
     @Test
@@ -156,7 +156,10 @@ class UserInfoServiceTest {
 
     @Test
     void getUserInfoFromDto() {
+
+        when(userInfoRepository.findById(1L)).thenReturn(Optional.of(newUserInfo));
         UserInfoDto getUserInfoDto = userInfoService.getUserInfoDtoById(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
         UserInfo getUserInfo = userInfoService.getUserInfoFromDto(getUserInfoDto);
         verify(userRepository).findById(1L);
 
@@ -168,6 +171,7 @@ class UserInfoServiceTest {
 
     @Test
     void getUserInfoDtoById() {
+        when(userInfoRepository.findById(1L)).thenReturn(Optional.of(newUserInfo));
         UserInfoDto getInfoDto = userInfoService.getUserInfoDtoById(1L);
         verify(userInfoRepository).findById(1L);
 
@@ -179,6 +183,7 @@ class UserInfoServiceTest {
 
     @Test
     void getUserInfoDtoMinById() {
+        when(userInfoRepository.findById(2L)).thenReturn(Optional.of(newUserInfo2));
         UserInfoDtoMin getInfoDtoMin = userInfoService.getUserInfoDtoMinById(2L);
 
         assertThat(getInfoDtoMin).isNotNull();
@@ -190,6 +195,7 @@ class UserInfoServiceTest {
     @Test
     void getUserInfoByUserDto() {
         UserDto getUserDto = userService.getUserDto(newUser1);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
         when(userInfoRepository.getUserInfoByUser(newUser1)).thenReturn(newUserInfo);
         UserInfoDto getInfoDto = userInfoService.getUserInfoByUserDto(getUserDto);
 
@@ -205,6 +211,7 @@ class UserInfoServiceTest {
 
     @Test
     void getUserInfoDtoByName() {
+        when(userInfoRepository.findAll()).thenReturn(userInfoList);
         List<UserInfoDto> getUserInfoDto = userInfoService.getUserInfoDtoByName("AP");
 
         verify(userInfoRepository).findAll();

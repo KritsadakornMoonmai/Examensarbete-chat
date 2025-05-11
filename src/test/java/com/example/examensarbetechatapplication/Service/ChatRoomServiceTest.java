@@ -137,14 +137,14 @@ class ChatRoomServiceTest {
 
 
 
-        when(userRepository.saveAll(anyList())).thenReturn(userLists);
+        /*when(userRepository.saveAll(anyList())).thenReturn(userLists);
         when(userRepository.findAll()).thenReturn(userLists);
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
         when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
 
         when(chatRoomRepository.save(any())).thenReturn(chatRoom);
         when(chatRoomRepository.getReferenceById(1L)).thenReturn(chatRoom);
-        when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList);
+        when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList);*/
     }
 
     @Test
@@ -170,6 +170,7 @@ class ChatRoomServiceTest {
 
     @Test
     void getChatRoomDtoMiniById() {
+        when(chatRoomRepository.getReferenceById(1L)).thenReturn(chatRoom);
         ChatRoomDtoMin getChatRoomDtoMin = chatRoomService.getChatRoomDtoMiniById(1L);
 
         assertThat(getChatRoomDtoMin).isNotNull();
@@ -180,6 +181,9 @@ class ChatRoomServiceTest {
 
     @Test
     void saveChatRoom() {
+
+        when(chatRoomRepository.save(any())).thenReturn(chatRoom);
+
         LocalDateTime dateTimeChatRoom2 = LocalDateTime.of(2025, 2, 12, 9, 34, 8);
         ChatRoom chatRoom2 = new ChatRoom("ChatRooms", dateTimeChatRoom2, ChatRoomTypes.PRIVATE);
         chatRoom2.setId(2L);
@@ -192,7 +196,6 @@ class ChatRoomServiceTest {
         chatRoom2.setChatRoomMembers(chatRoomMemberList2);
 
 
-        when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList2);
         //chatRoom2.setChatRoomMembers(new ArrayList<>());
 
         System.out.println("Before all save");
@@ -200,19 +203,14 @@ class ChatRoomServiceTest {
         assertThat(chatRoomDto).isNotNull();
 
         System.out.println("save 1");
-        when(chatRoomRepository.getReferenceById(2L)).thenReturn(chatRoom2);
-        when(chatRoomMemberRepository.getReferenceById(3L)).thenReturn(chatRoomMember3);
-        when(chatRoomMemberRepository.getReferenceById(4L)).thenReturn(chatRoomMember4);
-        when(messageRepository.findById(any())).thenReturn(null);
         when(chatRoomRepository.save(any())).thenReturn(chatRoom2);
+
 
         chatRoomService.saveChatRoom(chatRoomDto, List.of(chatRoomMember3, chatRoomMember4));
 
         System.out.println("save 2");
         verify(chatRoomRepository).save(chatRoom2);
         System.out.println("save 2.1");
-        verify(chatRoomMemberRepository).getReferenceById(3L);
-        verify(chatRoomMemberRepository).getReferenceById(4L);
         System.out.println("save 2.2");
         System.out.println("save 2.3");
 

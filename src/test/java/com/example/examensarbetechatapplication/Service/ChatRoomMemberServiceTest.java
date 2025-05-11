@@ -136,14 +136,14 @@ class ChatRoomMemberServiceTest {
 
 
 
-        when(userRepository.saveAll(anyList())).thenReturn(userLists);
+        /*when(userRepository.saveAll(anyList())).thenReturn(userLists);
         when(userRepository.findAll()).thenReturn(userLists);
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
         when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
 
         when(chatRoomRepository.save(any())).thenReturn(chatRoom);
         when(chatRoomRepository.getReferenceById(1L)).thenReturn(chatRoom);
-        when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList);
+        when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList);*/
     }
 
     @Test

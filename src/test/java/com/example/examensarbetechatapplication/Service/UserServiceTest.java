@@ -116,7 +116,7 @@ class UserServiceTest {
                 , userRelationshipService
                 , chatRoomMemberService);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
+        /*when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
         when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
@@ -125,11 +125,13 @@ class UserServiceTest {
 
 
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
-        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
+        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);*/
     }
 
     @Test
     void getUserDto() {
+        when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
+        when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
         User getUser = userRepository.findByUsername("myTestUsername");
         User getUser2 = userRepository.findByUsername("myTestUsername2");
         verify(userRepository).findByUsername("myTestUsername");
@@ -164,6 +166,10 @@ class UserServiceTest {
 
     @Test
     void getUserFromUserDto() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
+        when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
+
         UserRelationshipDto userRelationshipDto = userRelationshipService.getUserRelationshipDtoFull(user1Initiated.get(0));
 
         User user = userRepository.findByUsername("myTestUsername");
@@ -189,6 +195,7 @@ class UserServiceTest {
 
     @Test
     void getAllUser() {
+        when(userRepository.findAll()).thenReturn(userLists);
         List<UserDto> allUser = userService.getAllUser();
 
         verify(userRepository).findAll();
@@ -200,6 +207,7 @@ class UserServiceTest {
 
     @Test
     void getUserDtoById() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
         UserDto getUserDto = userService.getUserDtoById(1L);
 
         verify(userRepository).findById(1L);
@@ -211,6 +219,7 @@ class UserServiceTest {
 
     @Test
     void getUserDtoByUsername() {
+        when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
         UserDto getUserDto = userService.getUserDtoByUsername("myTestUsername2");
 
         verify(userRepository).findByUsername("myTestUsername2");
@@ -222,6 +231,7 @@ class UserServiceTest {
 
     @Test
     void getUserDtoMinByUsername() {
+        when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         UserDtoMin getUserDto = userService.getUserDtoMinByUsername("myTestUsername");
 
         assertEquals(getUserDto.getId(), 1);
@@ -231,6 +241,7 @@ class UserServiceTest {
 
     @Test
     void getUserByUserInfoFullName() {
+        when(userRepository.findAll()).thenReturn(userLists);
         when(userInfoRepository.findAll()).thenReturn(userInfoList);
         List<UserDto> getUser = userService.getUserByUserInfoFullName("JD");
 
@@ -268,6 +279,8 @@ class UserServiceTest {
 
     @Test
     void deleteUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
         UserDto getUser2Dto = userService.getUserDto(newUser2);
         when(userInfoRepository.findById(getUser2Dto.getUserInfoDtoMin().getId())).thenReturn(Optional.of(newUserInfo2));
 

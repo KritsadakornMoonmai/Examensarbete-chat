@@ -113,7 +113,7 @@ class UserRelationshipServiceTest {
                 , userRelationshipService
                 , chatRoomMemberService);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
+        /*when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
         when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
@@ -122,7 +122,7 @@ class UserRelationshipServiceTest {
 
 
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
-        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
+        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);*/
 
     }
 
@@ -137,6 +137,8 @@ class UserRelationshipServiceTest {
 
     @Test
     void getUserRelationshipFromDto() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
         UserRelationshipDto URD = userRelationshipService.getUserRelationshipDtoFull(relationship2);
         UserRelationship getUR = userRelationshipService.getUserRelationshipFromDto(URD);
 

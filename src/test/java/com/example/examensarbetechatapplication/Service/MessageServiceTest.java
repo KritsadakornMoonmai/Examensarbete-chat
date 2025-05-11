@@ -142,14 +142,14 @@ class MessageServiceTest {
 
 
 
-        when(userRepository.saveAll(anyList())).thenReturn(userLists);
+        /*when(userRepository.saveAll(anyList())).thenReturn(userLists);
         when(userRepository.findAll()).thenReturn(userLists);
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
         when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
 
         when(chatRoomRepository.save(any())).thenReturn(chatRoom);
         when(chatRoomMemberRepository.saveAll(anyList())).thenReturn(chatRoomMemberList);
-        when(messageRepository.saveAll(anyList())).thenReturn(messageList);
+        when(messageRepository.saveAll(anyList())).thenReturn(messageList);*/
     }
 
     @Test

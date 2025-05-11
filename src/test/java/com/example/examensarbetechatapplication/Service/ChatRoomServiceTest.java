@@ -116,7 +116,7 @@ class ChatRoomServiceTest {
 
         newUser1.setRelationshipInitiated(user1Initiated);
         newUser2.setRelationshipReceived(user2Received);
-        chatRoom = new ChatRoom(newUser1.getUserInfo().getFullName() + " " + newUser2.getUserInfo().getFullName(), dateTimeChatRoom);
+        chatRoom = new ChatRoom(newUser1.getUserInfo().getFullName() + " " + newUser2.getUserInfo().getFullName(), dateTimeChatRoom, ChatRoomTypes.PRIVATE);
 
         chatRoom.setId(id1);
         chatRoomMember1.setId(id1);
@@ -128,7 +128,7 @@ class ChatRoomServiceTest {
 
         messageService = new MessageService(messageRepository, chatRoomRepository, chatRoomMemberRepository);
         chatRoomMemberService = new ChatRoomMemberService(userRepository, chatRoomRepository, messageRepository, chatRoomMemberRepository);
-        chatRoomService = new ChatRoomService(chatRoomRepository, chatRoomMemberRepository, messageRepository);
+        chatRoomService = new ChatRoomService(chatRoomRepository, chatRoomMemberRepository, messageRepository, userRepository);
 
 
 
@@ -176,7 +176,7 @@ class ChatRoomServiceTest {
     @Test
     void saveChatRoom() {
         LocalDateTime dateTimeChatRoom2 = LocalDateTime.of(2025, 2, 12, 9, 34, 8);
-        ChatRoom chatRoom2 = new ChatRoom("ChatRooms", dateTimeChatRoom2);
+        ChatRoom chatRoom2 = new ChatRoom("ChatRooms", dateTimeChatRoom2, ChatRoomTypes.PRIVATE);
         chatRoom2.setId(2L);
 
         ChatRoomMember chatRoomMember3 = new ChatRoomMember(newUser1, dateTimeChatRoom2, chatRoom2, Roles.ADMIN);
@@ -201,7 +201,7 @@ class ChatRoomServiceTest {
         when(messageRepository.findById(any())).thenReturn(null);
         when(chatRoomRepository.save(any())).thenReturn(chatRoom2);
 
-        chatRoomService.saveChatRoom(chatRoomDto);
+        chatRoomService.saveChatRoom(chatRoomDto, List.of(chatRoomMember3, chatRoomMember4));
 
         System.out.println("save 2");
         verify(chatRoomRepository).save(chatRoom2);

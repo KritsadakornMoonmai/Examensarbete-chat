@@ -1,5 +1,6 @@
 package com.example.examensarbetechatapplication.DTO;
 
+import com.example.examensarbetechatapplication.Model.ChatRoomTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class ChatRoomDto {
     private long id;
     private String name;
     private LocalDateTime createAt;
+    private ChatRoomTypes chatRoomTypes;
     private List<ChatRoomMemberDtoMin> chatRoomMemberDtoMins;
     private List<MessageDtoMin> messageDtoMins;
 }

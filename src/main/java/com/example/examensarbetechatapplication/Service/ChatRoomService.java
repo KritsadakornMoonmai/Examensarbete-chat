@@ -3,15 +3,21 @@ package com.example.examensarbetechatapplication.Service;
 import com.example.examensarbetechatapplication.DTO.*;
 import com.example.examensarbetechatapplication.Model.ChatRoom;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
+import com.example.examensarbetechatapplication.Model.ChatRoomTypes;
 import com.example.examensarbetechatapplication.Model.Message;
 import com.example.examensarbetechatapplication.Repository.ChatRoomMemberRepository;
 import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
 import com.example.examensarbetechatapplication.Repository.MessageRepository;
+import com.example.examensarbetechatapplication.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Optionals;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,12 +27,14 @@ public class ChatRoomService {
     final private ChatRoomRepository chatRoomRepo;
     final private ChatRoomMemberRepository chatRoomMemberRepo;
     final private MessageRepository messageRepo;
+    final private UserRepository userRepo;
 
     protected ChatRoomDto getChatRoomDto(ChatRoom chatRoom) {
         return ChatRoomDto.builder()
                 .id(chatRoom.getId())
                 .createAt(chatRoom.getCreateAt())
                 .name(chatRoom.getName())
+                .chatRoomTypes(chatRoom.getChatRoomTypes())
                 .chatRoomMemberDtoMins(chatRoom.getChatRoomMembers().stream().map(member -> ChatRoomMemberDtoMin.builder()
                         .id(member.getId())
                         .joinedAt(member.getJoinedAt())
@@ -49,46 +57,95 @@ public class ChatRoomService {
                 .build();
     }
 
+    public ChatRoomDto getChatRoomDtoById(long id) {
+        ChatRoom chatRoom = chatRoomRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Chat room not found"));
+        return getChatRoomDto(chatRoom);
+    }
+
 
     public ChatRoomDtoMin getChatRoomDtoMiniById(long id) {
         ChatRoom chatRoom = chatRoomRepo.getReferenceById(id);
         return getChatRoomDtoMin(chatRoom);
     }
 
-    public ChatRoom getChatRoomFromDto(ChatRoomDto chatRoomDto) {
+    public ChatRoom getChatRoomFromDto(ChatRoomDto chatRoomDto, List<ChatRoomMember> chatRoomMember) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(chatRoomDto.getId())
                 .name(chatRoomDto.getName())
+                .chatRoomTypes(chatRoomDto.getChatRoomTypes())
                 .createAt(chatRoomDto.getCreateAt())
                 .build();
 
-        List<ChatRoomMember> chatRoomMemberList = chatRoomDto.getChatRoomMemberDtoMins()
+
+        List<Message> messageList = Optional.ofNullable(chatRoomDto.getMessageDtoMins())
+                .orElse(Collections.emptyList())
                 .stream()
-                .map(chatRoomMemberDtoMin -> {
-                    ChatRoomMember chatRoomMember = chatRoomMemberRepo.getReferenceById(chatRoomMemberDtoMin.getId());
-                    chatRoomMember.setChatRoom(chatRoom);
-                    return chatRoomMember;
-                })
+                .map(messageDtoMin -> messageRepo.findById(messageDtoMin.getId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .toList();
 
-        List<Message> messageList = chatRoomDto.getMessageDtoMins()
-                .stream()
-                .map(messageDtoMin -> {
-                    Message message = messageRepo.getReferenceById(messageDtoMin.getId());
-                    message.setChatRoom(null);
-                    return message;
-                })
-                .toList();
 
-        chatRoom.setChatRoomMembers(chatRoomMemberList);
+        chatRoom.setChatRoomMembers(chatRoomMember);
+        chatRoomMember.forEach(chatRoomMember1 -> chatRoomMember1.setChatRoom(chatRoom));
         chatRoom.setMessages(messageList);
 
         return chatRoom;
     }
 
-    public void saveChatRoom(ChatRoomDto chatRoomDto) {
-        ChatRoom newChatRoom = getChatRoomFromDto(chatRoomDto);
+    public ChatRoomDto createChatRoom(List<ChatRoomMemberDto> chatRoomMemberList, ChatRoomTypes chatRoomTypes) {
+        LocalDateTime current = LocalDateTime.now();
+        ChatRoomDto chatRoom;
+        List<ChatRoomMemberDtoMin> chatRoomMemberDtoMinList = new ArrayList<>();
+        if (chatRoomMemberList.size() < 2) {
+            return null;
+        } else {
+            chatRoom = new ChatRoomDto();
+            StringBuilder roomName = null;
+            for (int i = 0; i < chatRoomMemberList.size(); i++) {
+                ChatRoomMemberDto CRMDto = chatRoomMemberList.get(i);
+                ChatRoomMemberDtoMin CRMDtoMin = ChatRoomMemberDtoMin.builder()
+                        .id(CRMDto.getId())
+                        .roles(CRMDto.getRoles())
+                        .joinedAt(CRMDto.getJoinedAt())
+                        .build();
+                if (i == chatRoomMemberList.size()) {
+                    roomName = (roomName == null ? new StringBuilder("null") : roomName).append(chatRoomMemberList.get(i).getUserDtoMin().getUsername());
+                } else {
+                    roomName = (roomName == null ? new StringBuilder("null") : roomName).append(chatRoomMemberList.get(i).getUserDtoMin().getUsername()).append(", ");
+                }
+                chatRoomMemberDtoMinList.add(CRMDtoMin);
+            }
+            chatRoom.setChatRoomMemberDtoMins(chatRoomMemberDtoMinList);
+            chatRoom.setName(roomName != null ? roomName.toString() : null);
+            chatRoom.setCreateAt(current);
+            chatRoom.setChatRoomTypes(chatRoomTypes);
+            return chatRoom;
+        }
+    }
+
+    public void saveChatRoom(ChatRoomDto chatRoomDto, List<ChatRoomMember> chatRoomMember) {
+        ChatRoom newChatRoom = getChatRoomFromDto(chatRoomDto, chatRoomMember);
         System.out.println("newChatRoom saving " + newChatRoom.getName());
         chatRoomRepo.save(newChatRoom);
+    }
+
+    public Optional<ChatRoomDto> getChatRoomByUserAndFriend(long userId, long friendId, ChatRoomTypes chatRoomTypes) {
+        ChatRoomMember user1 = chatRoomMemberRepo.findChatRoomMemberByUserId(userId);
+        ChatRoomMember user2 = chatRoomMemberRepo.findChatRoomMemberByUserId(friendId);
+
+        if (user1 == null || user2 == null || chatRoomTypes == null) {
+            return Optional.empty();
+        }
+        List<Long> chatRoomMemberIdList = List.of(user1.getId(), user2.getId());
+        List<ChatRoom> chatRoomList = chatRoomRepo.findChatRoomWithExactMembers(chatRoomMemberIdList, chatRoomMemberIdList.size());
+
+        if (chatRoomList == null) {
+            return Optional.empty();
+        } else {
+            ChatRoom chatRoom = chatRoomList.get(0);
+            return Optional.of(getChatRoomDto(chatRoom));
+        }
     }
 }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link th:rel="stylesheet" th:href="@{/bootstrap.css}">
+    <link th:rel="stylesheet" th:href="@{/Stylesheet.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Info</title>
+</head>
+<body>
+<div class="container">
+    <h2>Edit user:</h2>
+    <form th:action="@{/api/user/edit/{username}(username=${user.getUsername()})}" method="post" enctype="multipart/form-data">
+        <div>
+            <img th:src="@{/api/user/edit/image/{username}(username=${user.getUsername()})}" alt="Profile Image" />
+            <label for="profileImage"></label>
+            <input type="file" id="profileImage" name="profileImage" accept="image/*">
+        </div>
+        <div>
+            <label for="fullName">Full name:</label><br>
+            <input type="text" id = "fullName" name="fullName" th:value="${userInfo.getFullName()} ?: null" required/>
+        </div>
+        <div>
+            <label for="age">Age:</label><br>
+            <input type="number" id="age" name="age" th:value="${userInfo.getAge()} ?: null" required/>
+        </div>
+        <div>
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" th:value="${user.getEmail()} ?: null" required/>
+        </div>
+        <div>
+            <label for="telephoneNumber">Telephone number: </label>
+            <input type="text" id="telephoneNumber" name="telephoneNumber" th:value="${userInfo.getTelephoneNumber()} ?: null" />
+        </div>
+
+        <button type="submit">Save changes</button>
+        <button type="button" onclick="window.history.back()">Cancel</button>
+    </form>
+</div>
+</body>
+</html>

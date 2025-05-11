@@ -23,13 +23,16 @@ public class UserInfo {
     private String fullName;
     private int age;
     private String telephoneNumber;
-    private ImageIcon profileImage;
+
+    @Lob
+    @Column(name = "profile_image", columnDefinition = "LONGBLOB")
+    private byte[] profileImage;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public UserInfo(String fullName, int age, String telephoneNumber, ImageIcon profileImage, User user) {
+    public UserInfo(String fullName, int age, String telephoneNumber, byte[] profileImage, User user) {
         this.fullName = fullName;
         this.age = age;
         this.telephoneNumber = telephoneNumber;

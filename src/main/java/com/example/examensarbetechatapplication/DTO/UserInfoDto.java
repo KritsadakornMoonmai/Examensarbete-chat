@@ -18,6 +18,6 @@ public class UserInfoDto {
     private String fullName;
     private int age;
     private String telephoneNumber;
-    private ImageIcon profileImage;
+    private byte[] profileImage;
     private UserDtoMin userDtoMin;
 }

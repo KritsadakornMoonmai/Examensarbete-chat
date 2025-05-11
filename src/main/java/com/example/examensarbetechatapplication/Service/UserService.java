@@ -9,18 +9,21 @@ import com.example.examensarbetechatapplication.Model.User;
 import com.example.examensarbetechatapplication.Model.UserInfo;
 import com.example.examensarbetechatapplication.Model.UserRelationship;
 import com.example.examensarbetechatapplication.Repository.UserInfoRepository;
-import com.example.examensarbetechatapplication.Repository.UserRelationshipRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
+import com.example.examensarbetechatapplication.security.ConcreteUserDetail;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
 
     final private UserRepository userRepo;
@@ -118,6 +121,13 @@ public class UserService {
         return getUserDto(user);
     }
 
+    public UserDtoMin getUserDtoMinById(long id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return getUserDtoMin(user);
+    }
+
     public UserDto getUserDtoByUsername(String username) {
         return getUserDto(userRepo.findByUsername(username));
     }
@@ -141,6 +151,18 @@ public class UserService {
         return userDtos;
     }
 
+    public UserDto fetchUser(String username, String password) {
+
+        UserDto userDto = getUserDtoByUsername(username);
+        if (userDto == null) {
+            return null;
+        } else if (Objects.equals(userDto.getPassword(), password)) {
+            return userDto;
+        } else {
+            return null;
+        }
+    }
+
     public void createUser(UserDto userDto) {
         User newUser = getUserFromUserDto(userDto);
         userRepo.save(newUser);
@@ -151,4 +173,14 @@ public class UserService {
         userRepo.delete(user);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepo.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("Could not find user");
+        }
+
+        return new ConcreteUserDetail(user);
+    }
 }

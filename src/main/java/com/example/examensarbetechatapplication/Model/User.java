@@ -7,6 +7,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -23,6 +25,7 @@ public class User {
     private String username;
     private String password;
     private String email;
+    private boolean enable;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -39,6 +42,13 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<ChatRoomMember> chatRoomMember = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_role_id")
+    )
+    private Collection<UserRole> roles;
 
 
     public User(String username, String password, String email) {

@@ -1,8 +1,7 @@
 package com.example.examensarbetechatapplication.Service;
 
 import com.example.examensarbetechatapplication.DTO.*;
-import com.example.examensarbetechatapplication.Model.ChatRoomMember;
-import com.example.examensarbetechatapplication.Model.Message;
+import com.example.examensarbetechatapplication.Model.*;
 import com.example.examensarbetechatapplication.Repository.ChatRoomMemberRepository;
 import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
 import com.example.examensarbetechatapplication.Repository.MessageRepository;
@@ -11,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -57,7 +58,7 @@ public class ChatRoomMemberService {
                 .build();
     }
 
-    protected ChatRoomMember getChatRoomMemberFromDto(ChatRoomMemberDto chatRoomMemberDto) {
+    public ChatRoomMember getChatRoomMemberFromDto(ChatRoomMemberDto chatRoomMemberDto) {
         List<Message> messageList = chatRoomMemberDto.getMessageDtoMins()
                 .stream()
                 .map(messageDtoMin -> messageRepo.getReferenceById(messageDtoMin.getId())).toList();
@@ -67,7 +68,6 @@ public class ChatRoomMemberService {
                 .id(chatRoomMemberDto.getId())
                 .joinedAt(chatRoomMemberDto.getJoinedAt())
                 .user(userRepo.getReferenceById(chatRoomMemberDto.getUserDtoMin().getId()))
-                .chatRoom(chatRoomRepo.getReferenceById(chatRoomMemberDto.getChatRoomDtoMin().getId()))
                 .messages(messageList)
                 .roles(chatRoomMemberDto.getRoles())
                 .build();
@@ -81,9 +81,29 @@ public class ChatRoomMemberService {
         return getChatMemberDtoMin(chatRoomMemberRepo.getReferenceById(id));
     }
 
+    public ChatRoomMemberDto getChatRoomMemberDtoById(long id) {
+        return getChatMemberDto(chatRoomMemberRepo.getReferenceById(id));
+    }
+
 
     protected ChatRoomMember getChatRoomMemberFromDtoMini(ChatRoomMemberDtoMin chatRoomMemberDtoMin) {
         return chatRoomMemberRepo.getReferenceById(chatRoomMemberDtoMin.getId());
+    }
+
+    public ChatRoomMemberDto createChatRoomMember(UserDtoMin userDtoMin, Roles roles) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        ChatRoomMemberDto chatRoomMember = new ChatRoomMemberDto();
+
+        chatRoomMember.setJoinedAt(currentTime);
+        chatRoomMember.setUserDtoMin(userDtoMin);
+        chatRoomMember.setRoles(roles);
+
+        return chatRoomMember;
+    }
+
+    public void saveChatRoomMember(ChatRoomMemberDto chatRoomMemberDto) {
+        ChatRoomMember chatRoomMember = getChatRoomMemberFromDto(chatRoomMemberDto);
+        chatRoomMemberRepo.save(chatRoomMember);
     }
 
 }

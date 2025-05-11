@@ -24,8 +24,9 @@ public class ChatRoom {
 
     private String name;
     private LocalDateTime createAt;
+    private ChatRoomTypes chatRoomTypes;
 
-    @OneToMany(mappedBy = "chatRoom")
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ChatRoomMember> chatRoomMembers;
 
@@ -33,8 +34,9 @@ public class ChatRoom {
     @JsonIgnore
     private List<Message> messages = new ArrayList<>();
 
-    public ChatRoom(String name, LocalDateTime createAt) {
+    public ChatRoom(String name, LocalDateTime createAt, ChatRoomTypes chatRoomTypes) {
         this.name = name;
         this.createAt = createAt;
+        this.chatRoomTypes = chatRoomTypes;
     }
 }

@@ -93,7 +93,7 @@ class MessageServiceTest {
 
     //CHATROOM--------------------------------------------------
     LocalDateTime dateTimeChatRoom = LocalDateTime.of(2025, 2, 11, 13, 10, 54);
-    ChatRoom chatRoom = new ChatRoom(newUserInfo.getFullName() + " " + newUserInfo2.getFullName(), dateTimeChatRoom);
+    ChatRoom chatRoom = new ChatRoom(newUserInfo.getFullName() + " " + newUserInfo2.getFullName(), dateTimeChatRoom, ChatRoomTypes.PRIVATE);
 
     //CHATROOM MEMBERS-------------------------------------------
     ChatRoomMember chatRoomMember1 = new ChatRoomMember(newUser1, dateTimeChatRoom, chatRoom, Roles.MEMBER);
@@ -133,7 +133,7 @@ class MessageServiceTest {
 
         messageService = new MessageService(messageRepository, chatRoomRepository, chatRoomMemberRepository);
         chatRoomMemberService = new ChatRoomMemberService(userRepository, chatRoomRepository, messageRepository, chatRoomMemberRepository);
-        chatRoomService = new ChatRoomService(chatRoomRepository,chatRoomMemberRepository, messageRepository);
+        chatRoomService = new ChatRoomService(chatRoomRepository,chatRoomMemberRepository, messageRepository, userRepository);
 
 
 

@@ -25,7 +25,7 @@ public class UserInfo {
     private String telephoneNumber;
 
     @Lob
-    @Column(name = "profile_image", columnDefinition = "BLOB")
+    @Column(name = "profile_image", columnDefinition = "LONGBLOB")
     private byte[] profileImage;
 
     @OneToOne(fetch = FetchType.EAGER)

@@ -1,8 +1,6 @@
 
 let stompClient = null;
-let chatRoomId = /*[[${chatRoom.getId()}]]*/ 1;
-let senderId = /*[[${sender.getId()}]]*/ 1;
-let username = /*[['${sender.getUserDtoMin().getUsername()'}]]*/ 'username';
+
 
 function connect() {
     const socket = new SockJS('/ws');
@@ -15,7 +13,8 @@ function connect() {
     });
 }
 
-function sendMessage() {
+function sendMessage(event) {
+    event.preventDefault();
     const content = document.getElementById('chat-input').value;
     if (content && stompClient) {
         const chatMessage = {

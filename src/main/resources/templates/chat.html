@@ -116,10 +116,11 @@
     <div class="chat-display" id="chat-display">
 
     </div>
-    <form id="chat-form" onsubmit="sendMessage(); return false;">
+    <form id="chat-form" onsubmit="sendMessage(event)">
       <input type="hidden" name="chatRoomId" th:value="${chatRoom.getId()}">
       <input type="hidden" name="senderId" th:value="${sender.getId()}">
-      <label for="chat-input"></label><input type="text" id="chat-input" placeholder="Type a message..." required />
+      <label for="chat-input"></label>
+      <input type="text" id="chat-input" placeholder="Type a message..." required />
       <button class="chat-button" type="submit">Send</button>
     </form>
   </div>

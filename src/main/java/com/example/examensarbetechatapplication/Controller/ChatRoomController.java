@@ -97,7 +97,6 @@ public class ChatRoomController {
 
         }
 
-        model.addAttribute("isChatRoomExist", true);
         model.addAttribute("user", userDto);
         model.addAttribute("sender", Objects.requireNonNull(sender));
         model.addAttribute("chatRoom", getFinalChatRoom);

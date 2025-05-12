@@ -246,12 +246,19 @@
             </div>
 
         </nav>
-        <div th:if="${chatRoom != null}" class="main-chat" th:insert="~{chat :: content}"></div>
+        <div th:if="${chatRoom != null}" class="main-chat" th:insert="~{chat :: content}">
+        </div>
         <p th:if="${chatRoom == null}" class="blank-space-message main-chat">Find a friend to talk with :)</p>
     </div>
 </div>
 
 </body>
+<script>
+    let chatRoomId = /*[[${chatRoom?.id} ?: 0]]*/ 0;
+    let senderId = /*[[${sender?.id} ?: 0]]*/ 0;
+    let username = /*[[${sender?.userDtoMin?.username} ?: 'Guest']]*/ 'Guest';
+</script>
+<script src="/script/mainPageHandler.js" defer></script>
 <script>
     document.querySelectorAll('.chat-form').forEach(form => {
         form.addEventListener('submit', function(event) {

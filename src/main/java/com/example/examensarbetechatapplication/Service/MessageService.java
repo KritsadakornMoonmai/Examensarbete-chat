@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MessageService {
@@ -34,6 +36,7 @@ public class MessageService {
                 .chatRoomMemberDtoMin(ChatRoomMemberDtoMin.builder()
                         .id(message.getChatRoomMember().getId())
                         .joinedAt(message.getChatRoomMember().getJoinedAt())
+                        .memberName(message.getChatRoomMember().getUser().getUsername())
                         .roles(message.getChatRoomMember().getRoles())
                         .build())
                 .chatRoomDtoMin(ChatRoomDtoMin.builder()
@@ -80,6 +83,13 @@ public class MessageService {
 
     public Message getMessageById(long id) {
         return messageRepo.findById(id).orElseThrow(() -> new RuntimeException("Message not found"));
+    }
+
+    public List<MessageDto> getAllMessage() {
+
+        return messageRepo.findAll().stream()
+                .map(this::getMessageDto)
+                .toList();
     }
 
     public void saveMessage(MessageDto messageDto) {

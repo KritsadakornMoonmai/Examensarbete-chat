@@ -16,5 +16,6 @@ public class ChatRoomMemberDtoMin {
 
     private long id;
     private LocalDateTime joinedAt;
+    private String memberName;
     private Roles roles;
 }

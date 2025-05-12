@@ -54,6 +54,7 @@ public class ChatRoomMemberService {
         return ChatRoomMemberDtoMin.builder()
                 .id(chatRoomMember.getId())
                 .joinedAt(chatRoomMember.getJoinedAt())
+                .memberName(chatRoomMember.getUser().getUsername())
                 .roles(chatRoomMember.getRoles())
                 .build();
     }

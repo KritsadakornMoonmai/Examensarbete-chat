@@ -10,13 +10,12 @@ function connect(event) {
         stompClient.subscribe('/topic/chatroom/' + chatRoomId, function (message) {
             showMessage(JSON.parse(message.body));
         });
+
     });
     console.log('Connected: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);
-    event.preventDefault();
 }
 
 function sendMessage(event) {
-    console.log('Sended: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);
     event.preventDefault();
     const content = document.getElementById('chat-input').value;
     if (content && stompClient) {
@@ -29,6 +28,8 @@ function sendMessage(event) {
         document.getElementById('chat-input').value = '';
     }
 }
+
+
 
 function showMessage(message) {
     console.log('Showed: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);

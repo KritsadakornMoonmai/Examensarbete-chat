@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link th:rel="stylesheet" th:href="@{/bootstrap.css}">
+    <link th:rel="stylesheet" th:href="@{/Stylesheet.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Register</title>
+</head>
+<body>
+<div class="container">
+    <h2>Register to ChatApp</h2>
+    <form th:action="@{/user/register}" method="post">
+        <label for="username">Username: </label><br>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password: </label><br>
+        <input type="password" id="password" name="password" required><br>
+        <label for="email">Email: </label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        <div>
+            <button type="submit">Submit</button>
+            <button type="button" onclick="window.history.back()">Go back</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

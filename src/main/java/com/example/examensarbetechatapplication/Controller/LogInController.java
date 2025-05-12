@@ -33,6 +33,11 @@ public class LogInController {
         return "login";
     }
 
+    @GetMapping("/register")
+    private String register() {
+        return "registerForm";
+    }
+
     @GetMapping("/login/success")
     public String userSuccessfulLogIn(Model model, Principal principal) {
 

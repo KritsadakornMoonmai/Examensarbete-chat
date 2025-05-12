@@ -39,6 +39,7 @@ public class ChatRoomService {
                         .id(member.getId())
                         .joinedAt(member.getJoinedAt())
                         .roles(member.getRoles())
+                                .memberName(member.getUser().getUsername())
                         .build())
                         .toList())
                 .messageDtoMins(chatRoom.getMessages().stream().map(message -> MessageDtoMin.builder()
@@ -108,9 +109,10 @@ public class ChatRoomService {
                 ChatRoomMemberDtoMin CRMDtoMin = ChatRoomMemberDtoMin.builder()
                         .id(CRMDto.getId())
                         .roles(CRMDto.getRoles())
+                        .memberName(CRMDto.getUserDtoMin().getUsername())
                         .joinedAt(CRMDto.getJoinedAt())
                         .build();
-                if (i == chatRoomMemberList.size()) {
+                if (i == chatRoomMemberList.size() - 1) {
                     roomName = (roomName == null ? new StringBuilder("null") : roomName).append(chatRoomMemberList.get(i).getUserDtoMin().getUsername());
                 } else {
                     roomName = (roomName == null ? new StringBuilder("null") : roomName).append(chatRoomMemberList.get(i).getUserDtoMin().getUsername()).append(", ");

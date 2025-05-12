@@ -3,9 +3,11 @@ package com.example.examensarbetechatapplication.Controller;
 import com.example.examensarbetechatapplication.DTO.*;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.ChatRoomTypes;
+import com.example.examensarbetechatapplication.Model.Message;
 import com.example.examensarbetechatapplication.Model.Roles;
 import com.example.examensarbetechatapplication.Service.ChatRoomMemberService;
 import com.example.examensarbetechatapplication.Service.ChatRoomService;
+import com.example.examensarbetechatapplication.Service.MessageService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/api/chatroom")
@@ -31,6 +30,9 @@ public class ChatRoomController {
 
     @Autowired
     private ChatRoomMemberService chatRoomMemberService;
+
+    @Autowired
+    private MessageService messageService;
 
     @PostMapping("/fetch")
     public String getChatRoomByUsers(
@@ -51,6 +53,7 @@ public class ChatRoomController {
         List<ChatRoomMemberDto> chatRoomMemberDtos;
         ChatRoomMemberDto sender;
         ChatRoomDto getFinalChatRoom;
+        List<MessageDto> messageList;
 
         if (chatRoomDto.isPresent()) {
             getFinalChatRoom = chatRoomDto.get();
@@ -67,8 +70,13 @@ public class ChatRoomController {
                     .findFirst()
                     .orElse(null);
 
-        } else {
+            messageList = messageService.getAllMessage().stream()
+                    .filter(messageDto -> messageDto.getChatRoomDtoMin().getId() == chatRoomDto.get().getId())
+                    .sorted(Comparator.comparing(MessageDto::getTime))
+                    .toList();
 
+        } else {
+            messageList = new ArrayList<>();
             UserDtoMin friendDto = userService.getUserDtoMinById(friendId);
 
             ChatRoomMemberDto chatRoomMemberDto1 = chatRoomMemberService.createChatRoomMember(userDto, Roles.MEMBER);
@@ -97,9 +105,11 @@ public class ChatRoomController {
 
         }
 
+        System.out.println(getFinalChatRoom.getChatRoomMemberDtoMins().get(1).getMemberName());
         model.addAttribute("user", userDto);
         model.addAttribute("sender", Objects.requireNonNull(sender));
         model.addAttribute("chatRoom", getFinalChatRoom);
+        model.addAttribute("messages", messageList);
 
         return "chat :: content";
     }

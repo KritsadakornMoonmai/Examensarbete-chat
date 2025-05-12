@@ -2,7 +2,7 @@
 let stompClient = null;
 
 
-function connect() {
+function connect(event) {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
@@ -11,9 +11,12 @@ function connect() {
             showMessage(JSON.parse(message.body));
         });
     });
+    console.log('Connected: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);
+    event.preventDefault();
 }
 
 function sendMessage(event) {
+    console.log('Sended: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);
     event.preventDefault();
     const content = document.getElementById('chat-input').value;
     if (content && stompClient) {
@@ -27,12 +30,8 @@ function sendMessage(event) {
     }
 }
 
-
-window.onload = function() {
-    connect(); // Initialize WebSocket connection
-};
-
 function showMessage(message) {
+    console.log('Showed: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);
     const messageArea = document.getElementById('chat-display');
     const messageElement = document.createElement('div');
 
@@ -55,7 +54,14 @@ function showMessage(message) {
     messageElement.style.padding = '10px';
     messageElement.style.margin = '5px';
     messageElement.style.borderRadius = '10px';
+    messageElement.style.color= 'black';
     messageArea.appendChild(messageElement);
 }
 
-window.onload = connect;
+window.onload = function () {
+    if (chatRoomId !== 0 && senderId !== 0) {
+        connect();
+    } else {
+        console.error('ChatRoomId or SenderId is invalid.');
+    }
+}

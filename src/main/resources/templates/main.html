@@ -246,9 +246,10 @@
             </div>
 
         </nav>
-        <div th:if="${chatRoom != null}" class="main-chat" th:insert="~{chat :: content}">
+        <div class="main-chat">
+            <div th:if="${chatRoom != null}" th:insert="~{chat :: content}"></div>
+            <p th:if="${chatRoom == null}" class="blank-space-message">Find a friend to talk with :)</p>
         </div>
-        <p th:if="${chatRoom == null}" class="blank-space-message main-chat">Find a friend to talk with :)</p>
     </div>
 </div>
 
@@ -283,12 +284,45 @@
                     return response.text();
                 })
                 .then(html => {
-                    document.querySelector('.main-chat').innerHTML = html;
+                    const mainChat = document.querySelector('.main-chat');
+                    mainChat.innerHTML = html;
+
+                    // Update JavaScript variables from hidden inputs or meta tags in the fetched content
+                    const newChatRoomId = mainChat.querySelector('input[name="chatRoomId"]').value || 0;
+                    const newSenderId = mainChat.querySelector('input[name="senderId"]').value || 0;
+                    const newUsername = mainChat.querySelector('input[name="username"]').value || 'Guest';
+
+                    if (!newChatRoomId || !newSenderId || !newUsername) {
+                        throw new Error("Required inputs are missing in the fetched chat content");
+                    } else {
+                        console.log("chatRoomId: " + newChatRoomId);
+                        console.log("senderId: " + newSenderId);
+                        console.log("username: " + newUsername);
+                    }
+
+                    // Update global variables
+                    chatRoomId = parseInt(newChatRoomId, 10);
+                    senderId = parseInt(newSenderId, 10);
+                    username = newUsername;
+
+                    // Reconnect WebSocket or reinitialize functionalities if needed
+                    connect(); // or any other necessary logic
                 })
                 .catch(error => {
                     console.error('Error loading chat:', error);
                 });
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainChat = document.querySelector('.main-chat');
+        if (!mainChat) {
+            console.error('.main-chat element is missing from the DOM');
+            return;
+        }
+
+        // Proceed with your logic
+        console.log('Found .main-chat:', mainChat);
     });
 </script>
 <script>

@@ -81,6 +81,7 @@
       display: flex;
       padding: 10px;
       background-color: #0b1219;
+      border-top: 1px solid #ccc;
     }
 
     #chat-input {
@@ -117,8 +118,9 @@
 
     </div>
     <form id="chat-form" onsubmit="sendMessage(event)">
-      <input type="hidden" name="chatRoomId" th:value="${chatRoom.getId()}">
-      <input type="hidden" name="senderId" th:value="${sender.getId()}">
+      <input type="hidden" name="chatRoomId" th:value="${chatRoom?.getId() ?: 0}">
+      <input type="hidden" name="senderId" th:value="${sender?.getId() ?: 0}">
+      <input type="hidden" name="username" th:value="${sender?.getUserDtoMin()?.getUsername() ?: 'Guest'}">
       <label for="chat-input"></label>
       <input type="text" id="chat-input" placeholder="Type a message..." required />
       <button class="chat-button" type="submit">Send</button>

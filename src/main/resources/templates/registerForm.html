@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <link th:rel="stylesheet" th:href="@{/bootstrap.css}">
     <link th:rel="stylesheet" th:href="@{/Stylesheet.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -10,7 +10,7 @@
 <body>
 <div class="container">
     <h2>Register to ChatApp</h2>
-    <form th:action="@{/user/register}" method="post">
+    <form th:action="@{/api/user/create}" method="post">
         <label for="username">Username: </label><br>
         <input type="text" id="username" name="username" required><br>
         <label for="password">Password: </label><br>
@@ -21,6 +21,7 @@
             <button type="submit">Submit</button>
             <button type="button" onclick="window.history.back()">Go back</button>
         </div>
+        <div th:if="${RegisterMessage != null}" th:text="${RegisterMessage}" class="alert"></div>
     </form>
 </div>
 </body>

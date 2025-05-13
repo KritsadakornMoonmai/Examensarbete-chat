@@ -4,12 +4,10 @@ import com.example.examensarbetechatapplication.DTO.UserDto;
 import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserInfoDto;
 import com.example.examensarbetechatapplication.DTO.UserInfoDtoMin;
-import com.example.examensarbetechatapplication.Model.ChatRoomMember;
-import com.example.examensarbetechatapplication.Model.User;
-import com.example.examensarbetechatapplication.Model.UserInfo;
-import com.example.examensarbetechatapplication.Model.UserRelationship;
+import com.example.examensarbetechatapplication.Model.*;
 import com.example.examensarbetechatapplication.Repository.UserInfoRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
+import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
 import com.example.examensarbetechatapplication.security.ConcreteUserDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,9 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +24,7 @@ public class UserService implements UserDetailsService {
 
     final private UserRepository userRepo;
     final private UserInfoRepository userInfoRepo;
+    final private UserRoleRepository userRoleRepo;
 
     final private UserInfoService userInfoService;
 
@@ -37,7 +34,6 @@ public class UserService implements UserDetailsService {
 
     protected UserDto getUserDto(User user) {
 
-        System.out.println("UserInfoID: "+user.getUserInfo().getId());
         UserInfoDtoMin userInfoDtoMin = new UserInfoDtoMin(
                 user.getUserInfo().getId(),
                 user.getUserInfo().getFullName(),
@@ -49,6 +45,7 @@ public class UserService implements UserDetailsService {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .email(user.getEmail())
+                .enable(user.isEnable())
                 .userInfoDtoMin(userInfoDtoMin)
                 .relationshipInitiatedDtos(
                         user.getRelationshipInitiated()
@@ -80,12 +77,26 @@ public class UserService implements UserDetailsService {
                 .build();
     }
 
-    protected User getUserFromUserDto(UserDto userDto) {
-        System.out.println("UserDto UserInfo Id: "+userDto.getUserInfoDtoMin().getId());
-        UserInfo userInfo = userInfoRepo.findById(userDto.getUserInfoDtoMin().getId())
-                .orElseThrow(() -> new RuntimeException("User Info not found"));
+    public boolean findIfUserOrEmailExist(String username, String email) {
+        return userRepo.existsByUsernameOrEmail(username, email);
+    }
 
-        List<UserRelationship> initiatedList = userDto.getRelationshipInitiatedDtos()
+    protected User getUserFromUserDto(UserDto userDto) {
+        User user = User.builder()
+                .id(userDto.getId())
+                .username(userDto.getUsername())
+                .password(userDto.getPassword())
+                .email(userDto.getEmail())
+                .enable(userDto.isEnable())
+                .build();
+
+        Optional<UserInfo> userInfo = userInfoRepo.findById(userDto.getUserInfoDtoMin().getId());
+        UserInfo finalUserInfo = userInfo.orElseGet(UserInfo::new);
+
+        user.setUserInfo(finalUserInfo);
+        finalUserInfo.setUser(user);
+
+        /*List<UserRelationship> initiatedList = userDto.getRelationshipInitiatedDtos()
                 .stream()
                 .map(userRelationshipService::getUserRelationshipFromDto)
                 .toList();
@@ -98,30 +109,24 @@ public class UserService implements UserDetailsService {
         List<ChatRoomMember> chatRoomMembers = userDto.getChatRoomMemberDtoMins()
                 .stream()
                 .map(chatRoomMemberService::getChatRoomMemberFromDtoMini)
-                .toList();
+                .toList();*/
 
-        return User.builder()
-                .id(userDto.getId())
-                .username(userDto.getUsername())
-                .password(userDto.getPassword())
-                .email(userDto.getEmail())
-                .userInfo(userInfo)
-                .relationshipInitiated(initiatedList)
-                .relationshipReceived(receivedList)
-                .chatRoomMember(chatRoomMembers)
-                .build();
+        return user;
     }
 
     public List<UserDto> getAllUser() {
-        return userRepo.findAll().stream().map(this::getUserDto).toList();
+        List<UserDto> userDtos = new ArrayList<>();
+        userRepo.findAll().forEach(user -> userDtos.add(getUserDto(user)));
+
+        return userDtos;
     }
 
-    public UserDto getUserDtoById(long id) {
+    public UserDto getUserDtoById(UUID id) {
         User user = userRepo.findById(id).orElseThrow(() ->new RuntimeException("User not found"));
         return getUserDto(user);
     }
 
-    public UserDtoMin getUserDtoMinById(long id) {
+    public UserDtoMin getUserDtoMinById(UUID id) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -171,6 +176,10 @@ public class UserService implements UserDetailsService {
     public void deleteUser(UserDto userDto) {
         User user = getUserFromUserDto(userDto);
         userRepo.delete(user);
+    }
+
+    public UserRole getUserRole(String role) {
+        return userRoleRepo.findUserRoleByRole(role);
     }
 
     @Override

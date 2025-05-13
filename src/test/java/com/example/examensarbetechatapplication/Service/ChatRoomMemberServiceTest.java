@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -109,8 +110,10 @@ class ChatRoomMemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        newUser1.setId(id1);
-        newUser2.setId(id2);
+        UUID uuid = UUID.randomUUID();
+        UUID uuid2 = UUID.randomUUID();
+        newUser1.setId(uuid);
+        newUser2.setId(uuid2);
 
         newUserInfo.setId(id1);
         newUserInfo2.setId(id2);

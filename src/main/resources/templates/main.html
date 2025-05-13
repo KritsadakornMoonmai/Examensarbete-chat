@@ -212,7 +212,7 @@
         <div class="dropdown-content">
             <form th:each="friend : ${friendList}" class="chat-form">
                 <input type="hidden" name="userId" th:value="${user.getId()}">
-                <input type="hidden" name="friendId" th:value="${friend.getId()}">
+                <input type="hidden" name="friendId" th:value="${friend.getUser().getId()}">
                 <input type="hidden" name="type" th:value="PRIVATE">
                 <button type="submit">
                     <a th:text="${friend.getUser().getUsername()}"></a>
@@ -231,7 +231,10 @@
     </div>
     <div class="main">
         <nav>
-            <h1 style="color: white">This is navbar</h1>
+            <div>
+                <label for="search-input"></label>
+                <input type="text" id="search-input" placeholder="find other user here..." />
+            </div>
             <div class="button-usermanage-container">
                 <form th:action="@{/api/user/edit/{username}(username=${username})}" method="get">
                     <button class="user-container user-btn" type="submit" >
@@ -334,7 +337,6 @@
             this.classList.toggle("active");
             var dropdownContent = this.nextElementSibling;
             var fa = this.querySelector(".fa");
-            console.log(dropdownContent);
             if (dropdownContent.style.display === "block") {
                 dropdownContent.style.display = "none";
                 fa.classList.remove("fa-caret-right")

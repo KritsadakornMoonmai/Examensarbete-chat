@@ -14,10 +14,7 @@ import org.springframework.data.util.Optionals;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -133,15 +130,15 @@ public class ChatRoomService {
         chatRoomRepo.save(newChatRoom);
     }
 
-    public Optional<ChatRoomDto> getChatRoomByUserAndFriend(long userId, long friendId, ChatRoomTypes chatRoomTypes) {
+    public Optional<ChatRoomDto> getChatRoomByUserAndFriend(UUID userId, UUID friendId, ChatRoomTypes chatRoomTypes) {
         ChatRoomMember user1 = chatRoomMemberRepo.findChatRoomMemberByUserId(userId);
         ChatRoomMember user2 = chatRoomMemberRepo.findChatRoomMemberByUserId(friendId);
 
         if (user1 == null || user2 == null || chatRoomTypes == null) {
             return Optional.empty();
         }
-        List<Long> chatRoomMemberIdList = List.of(user1.getId(), user2.getId());
-        List<ChatRoom> chatRoomList = chatRoomRepo.findChatRoomWithExactMembers(chatRoomMemberIdList, chatRoomMemberIdList.size());
+        List<UUID> chatRoomMemberIdList = List.of(userId, friendId);
+        List<ChatRoom> chatRoomList = chatRoomRepo.findChatRoomWithExactMembersByUserIds(chatRoomMemberIdList, chatRoomMemberIdList.size());
 
         if (chatRoomList == null) {
             return Optional.empty();

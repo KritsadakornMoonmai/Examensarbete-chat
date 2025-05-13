@@ -2,6 +2,7 @@ package com.example.examensarbetechatapplication.security;
 
 import com.example.examensarbetechatapplication.Repository.UserInfoRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
+import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
 import com.example.examensarbetechatapplication.Service.ChatRoomMemberService;
 import com.example.examensarbetechatapplication.Service.UserInfoService;
 import com.example.examensarbetechatapplication.Service.UserRelationshipService;
@@ -30,6 +31,7 @@ public class SecurityConfig {
 
     final private UserRepository userRepo;
     final private UserInfoRepository userInfoRepo;
+    final private UserRoleRepository userRoleRepo;
     final private UserInfoService userInfoService;
     final private UserRelationshipService userRelationshipService;
     final private ChatRoomMemberService chatRoomMemberService;
@@ -37,7 +39,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserService(userRepo, userInfoRepo, userInfoService, userRelationshipService, chatRoomMemberService);
+        return new UserService(userRepo, userInfoRepo, userRoleRepo, userInfoService, userRelationshipService, chatRoomMemberService);
     }
 
     @Bean
@@ -58,7 +60,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/",  "/js/**", "/css/**", "/images/**", "/login/**", "/user/login", "/logout","/queues/**", "/forgot-password", "/reset-password").permitAll()
+                        .requestMatchers("/",  "/js/**", "/css/**", "/images/**", "/login/**", "/user/login", "/logout","/queues/**", "/user/register", "/api/user/create", "/reset-password").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

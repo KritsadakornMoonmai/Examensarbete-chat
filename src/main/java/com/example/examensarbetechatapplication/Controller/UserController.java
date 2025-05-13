@@ -3,6 +3,9 @@ package com.example.examensarbetechatapplication.Controller;
 import com.example.examensarbetechatapplication.DTO.UserDto;
 import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserInfoDto;
+import com.example.examensarbetechatapplication.DTO.UserInfoDtoMin;
+import com.example.examensarbetechatapplication.Model.UserRole;
+import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
 import com.example.examensarbetechatapplication.Service.UserInfoService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,16 +14,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.*;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/user")
@@ -39,7 +43,7 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public @ResponseBody UserDto getUserById(@RequestParam long id, Model model) {
+    public @ResponseBody UserDto getUserById(@RequestParam UUID id) {
         return userService.getUserDtoById(id);
     }
 
@@ -54,25 +58,38 @@ public class UserController {
         return "page.html";
     }
 
-    @PostMapping("/create/{username}")
-    public String createUser(@PathVariable String username,
+    @PostMapping("/create")
+    public String createUser(@RequestParam String username,
                              @RequestParam String password,
-                             @RequestParam String email) {
-        UserDto userDto = new UserDto();
-        userDto.setUsername(username);
-        userDto.setPassword(password);
-        userDto.setEmail(email);
-        userService.createUser(userDto);
+                             @RequestParam String email,
+                             Model model) {
 
-        UserInfoDto userInfoDto = new UserInfoDto();
-        UserDtoMin userDtoMin = new UserDtoMin();
-        userDtoMin.setUsername(userDto.getUsername());
-        userDtoMin.setEmail(userDto.getEmail());
+        System.out.println("Creating user...");
+        if (userService.findIfUserOrEmailExist(username, email)) {
+            model.addAttribute("RegisterMessage", "Cannot create account due to information already exist");
+            return "registerForm";
+        } else {
+            String bcryptPassword = new BCryptPasswordEncoder().encode(password);
+            UserDto userDto = new UserDto();
+            userDto.setUsername(username);
+            userDto.setPassword(bcryptPassword);
+            userDto.setEmail(email);
+            userDto.setEnable(true);
+            userDto.setUserRole(Collections.singleton(userService.getUserRole("User")));
 
-        userInfoDto.setUserDtoMin(userDtoMin);
-        userInfoService.createUserInfo(userInfoDto);
+            UserInfoDtoMin userInfoDtoMin = new UserInfoDtoMin();
+            UserDtoMin userDtoMin = new UserDtoMin();
+            userDtoMin.setUsername(userDto.getUsername());
+            userDtoMin.setEmail(userDto.getEmail());
 
-        return "user";
+            userDto.setUserInfoDtoMin(userInfoDtoMin);
+
+            userService.createUser(userDto);
+            //userInfoService.createUserInfo(userInfoDto);
+
+            System.out.println("...Creating user done");
+            return "redirect:/user/login";
+        }
     }
 
     @GetMapping("/edit/{username}")

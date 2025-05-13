@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findChatRoomByChatRoomMembersAndChatRoomTypes(List<ChatRoomMember> list, ChatRoomTypes chatRoomTypes);
@@ -16,12 +17,17 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     SELECT cr
     FROM ChatRoom cr
     JOIN cr.chatRoomMembers m
-    WHERE m.user.id IN :memberIds
+    WHERE m.user.id IN :userIds
     GROUP BY cr.id
     HAVING COUNT(DISTINCT m.user.id) = :size
+       AND COUNT(m) = (
+           SELECT COUNT(m2)
+           FROM ChatRoomMember m2
+           WHERE m2.chatRoom.id = cr.id
+       )
 """)
-    List<ChatRoom> findChatRoomWithExactMembers(
-            @Param("memberIds") List<Long> memberIds,
+    List<ChatRoom> findChatRoomWithExactMembersByUserIds(
+            @Param("userIds") List<UUID> userIds,
             @Param("size") long size
     );
 }

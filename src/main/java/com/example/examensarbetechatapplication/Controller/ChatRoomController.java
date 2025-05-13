@@ -36,8 +36,8 @@ public class ChatRoomController {
 
     @PostMapping("/fetch")
     public String getChatRoomByUsers(
-            @RequestParam long userId,
-            @RequestParam long friendId,
+            @RequestParam UUID userId,
+            @RequestParam UUID friendId,
             @RequestParam String type,
             Model model) {
 

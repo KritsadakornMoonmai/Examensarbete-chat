@@ -72,7 +72,7 @@
     background-color: #0b1219;
 }
 
-#chat-input {
+#chat-input #search-input {
     flex: 1;
     font-size: 16px;
     height: 40px;

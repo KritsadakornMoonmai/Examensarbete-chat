@@ -55,6 +55,17 @@ public class LogInController {
                     .stream()
                     .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.ACCEPTED && userDto.getId() != userRelationshipDto.getUser().getId()).toList();
 
+
+            List<UserRelationshipDto> RequestReceived = userDto.getRelationshipReceivedDtos()
+                    .stream()
+                    .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.PENDING).toList();
+
+            for (UserRelationshipDto req : RequestReceived) {
+                System.out.println("Fetch req receive:");
+                System.out.println("Current user: " + userDto.getUsername());
+                System.out.println("Receiver" + req.getUser().getUsername());
+            }
+
             List<UserRelationshipDto> mergedFriendLists = Stream.concat(friendListInitialized.stream(), friendListReceived.stream()).toList();
 
             if (userDto == null) {
@@ -67,6 +78,7 @@ public class LogInController {
                 model.addAttribute("friendList", mergedFriendLists);
                 model.addAttribute("userInfo", userInfoDto);
                 model.addAttribute("username", userDto.getUsername());
+                model.addAttribute("friendRequest", RequestReceived);
                 return "main";
             }
         } catch (Exception e) {

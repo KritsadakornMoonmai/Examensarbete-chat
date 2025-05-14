@@ -4,6 +4,7 @@ import com.example.examensarbetechatapplication.Model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserRepository extends CrudRepository<User, UUID> {
@@ -12,4 +13,9 @@ public interface UserRepository extends CrudRepository<User, UUID> {
     boolean existsByUsernameOrEmail(String username, String email);
 
     User getReferenceById(UUID id);
+
+    List<User> findUsersByUsernameIsContaining(String username);
+
+    List<User> findUsersByUsername(String username);
+
 }

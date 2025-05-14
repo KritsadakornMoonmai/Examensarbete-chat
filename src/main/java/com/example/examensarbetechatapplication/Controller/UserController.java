@@ -1,12 +1,12 @@
 package com.example.examensarbetechatapplication.Controller;
 
-import com.example.examensarbetechatapplication.DTO.UserDto;
-import com.example.examensarbetechatapplication.DTO.UserDtoMin;
-import com.example.examensarbetechatapplication.DTO.UserInfoDto;
-import com.example.examensarbetechatapplication.DTO.UserInfoDtoMin;
+import com.example.examensarbetechatapplication.DTO.*;
+import com.example.examensarbetechatapplication.Model.RelationshipStatus;
+import com.example.examensarbetechatapplication.Model.UserRelationship;
 import com.example.examensarbetechatapplication.Model.UserRole;
 import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
 import com.example.examensarbetechatapplication.Service.UserInfoService;
+import com.example.examensarbetechatapplication.Service.UserRelationshipService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Controller
 @RequestMapping("/api/user")
@@ -37,6 +36,9 @@ public class UserController {
     @Autowired
     private UserInfoService userInfoService;
 
+    @Autowired
+    private UserRelationshipService userRelationshipService;
+
     @GetMapping("/lists")
     public @ResponseBody List<UserDto> getAllUsers() {
         return userService.getAllUser();
@@ -47,15 +49,17 @@ public class UserController {
         return userService.getUserDtoById(id);
     }
 
-    @GetMapping("/search/{userInfo_FullName}")
-    public String getUserByName(@PathVariable String userInfo_FullName, Model model) {
-        List<UserInfoDto> userInfoDtos = userInfoService.getUserInfoDtoByName(userInfo_FullName);
-        List<UserDto> userDtos = userService.getUserByUserInfoFullName(userInfo_FullName);
+    @GetMapping("/search")
+    @ResponseBody
+    public List<UserDto> getUserByName(@RequestParam String query, @RequestParam String username) {
+        System.out.println("From: " + username);
+        List<UserDto> userDtos = userService.getUserDtosByUsername(query)
+                .stream()
+                .filter(userDto -> !Objects.equals(username, userDto.getUsername()))
+                .toList();
+        System.out.println("Searched: "+userDtos.get(0).getUsername());
 
-        model.addAttribute(userInfoDtos);
-        model.addAttribute(userDtos);
-
-        return "page.html";
+        return userDtos;
     }
 
     @PostMapping("/create")
@@ -64,7 +68,6 @@ public class UserController {
                              @RequestParam String email,
                              Model model) {
 
-        System.out.println("Creating user...");
         if (userService.findIfUserOrEmailExist(username, email)) {
             model.addAttribute("RegisterMessage", "Cannot create account due to information already exist");
             return "registerForm";
@@ -87,9 +90,99 @@ public class UserController {
             userService.createUser(userDto);
             //userInfoService.createUserInfo(userInfoDto);
 
-            System.out.println("...Creating user done");
             return "redirect:/user/login";
         }
+    }
+
+    @PostMapping("/send_request")
+    public String sendingFriendRequest(@RequestBody Map<String, String> payload) {
+        String senderUsername = payload.get("senderUsername");
+        String receiverUsername = payload.get("receiverUsername");
+        System.out.println("FriendRequest received");
+        System.out.println(senderUsername);
+        System.out.println(receiverUsername);
+        Optional<UserDto> sender = Optional.ofNullable(userService.getUserDtoByUsername(senderUsername));
+        Optional<UserDto> receiver = Optional.ofNullable(userService.getUserDtoByUsername(receiverUsername));
+
+        if (sender.isEmpty() || receiver.isEmpty()) {
+            return null;
+        }
+        UserDtoMin senderDtoMin = UserDtoMin.builder()
+                .id(sender.get().getId())
+                .username(sender.get().getUsername())
+                .email(sender.get().getEmail())
+                .build();
+
+        UserDtoMin receiverDtoMin = UserDtoMin.builder()
+                .id(receiver.get().getId())
+                .username(receiver.get().getUsername())
+                .email(receiver.get().getEmail())
+                .build();
+
+        UserRelationshipDto userRelationshipDto1;
+        UserRelationshipDto userRelationshipDto2;
+
+        if (userRelationshipService.findUserRelationShipIsExist(sender.get().getUsername(), receiver.get().getUsername())
+        || userRelationshipService.findUserRelationShipIsExist(receiver.get().getUsername(), sender.get().getUsername())) {
+
+            userRelationshipDto1 = userRelationshipService.findRelationshipByUserAndFriend(sender.get().getUsername(), receiver.get().getUsername());
+            userRelationshipDto2 = userRelationshipService.findRelationshipByUserAndFriend(receiver.get().getUsername(), sender.get().getUsername());
+
+            if (userRelationshipDto1.getStatus() == RelationshipStatus.ACCEPTED && userRelationshipDto2.getStatus() == RelationshipStatus.ACCEPTED) {
+                return "redirect:/user/login/success";
+            } else {
+                userRelationshipDto1.setStatus(RelationshipStatus.PENDING);
+                userRelationshipDto2.setStatus(RelationshipStatus.PENDING);
+                userRelationshipService.saveUserRelationship(List.of(userRelationshipDto1, userRelationshipDto2));
+                return "redirect:/user/login/success";
+            }
+        } else {
+
+            userRelationshipDto1 = new UserRelationshipDto();
+            userRelationshipDto2 = new UserRelationshipDto();
+
+            userRelationshipDto1.setUser(senderDtoMin);
+            userRelationshipDto1.setFriend(receiverDtoMin);
+            userRelationshipDto1.setRelatedAt(LocalDateTime.now());
+            userRelationshipDto1.setStatus(RelationshipStatus.PENDING);
+
+            userRelationshipDto2.setUser(receiverDtoMin);
+            userRelationshipDto2.setFriend(senderDtoMin);
+            userRelationshipDto2.setRelatedAt(LocalDateTime.now());
+            userRelationshipDto2.setStatus(RelationshipStatus.PENDING);
+
+            sender.get().setRelationshipInitiatedDtos(List.of(userRelationshipDto1));
+            receiver.get().setRelationshipReceivedDtos(List.of(userRelationshipDto2));
+
+            userService.createUser(sender.get());
+            userService.createUser(receiver.get());
+            userRelationshipService.saveUserRelationship(List.of(userRelationshipDto1, userRelationshipDto2));
+            System.out.println("FriendRequest completed");
+        }
+        return "redirect:/user/login/success";
+    }
+
+    @PostMapping("/send-request/accept")
+    public String friendRequestAccepted(@RequestParam String username, @RequestParam String senderUsername, @RequestParam boolean isAccepted) {
+        if (userRelationshipService.findUserRelationShipIsExist(username, senderUsername) && isAccepted) {
+            UserRelationshipDto userRelationshipDto1 = userRelationshipService.findRelationshipByUserAndFriend(senderUsername, username);
+            UserRelationshipDto userRelationshipDto2 = userRelationshipService.findRelationshipByUserAndFriend(username, senderUsername);
+
+            userRelationshipDto1.setStatus(RelationshipStatus.ACCEPTED);
+            userRelationshipDto2.setStatus(RelationshipStatus.ACCEPTED);
+
+        } else if (userRelationshipService.findUserRelationShipIsExist(username, senderUsername) && !isAccepted) {
+            UserRelationshipDto userRelationshipDto1 = userRelationshipService.findRelationshipByUserAndFriend(senderUsername, username);
+            UserRelationshipDto userRelationshipDto2 = userRelationshipService.findRelationshipByUserAndFriend(username, senderUsername);
+
+            userRelationshipDto1.setStatus(RelationshipStatus.REJECTED);
+            userRelationshipDto2.setStatus(RelationshipStatus.REJECTED);
+
+        } else {
+            return null;
+        }
+
+        return "redirect:/user/login/success";
     }
 
     @GetMapping("/edit/{username}")

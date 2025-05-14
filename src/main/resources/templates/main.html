@@ -228,12 +228,28 @@
             <a href="#">Group2</a>
             <a href="#">Group3</a>
         </div>
+        <button class="dropbtn">
+            Friend request
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <form th:each="requestRelation : ${friendRequest}" class="request-form">
+                <input type="hidden" name="username" th:value="${user.getUsername()}">
+                <input type="hidden" name="senderUsername" th:value="${requestRelation.getFriend().getUsername()}">
+                <button type="submit">
+                    <a th:text="${requestRelation.getUser().getUsername()}"></a>
+                </button>
+            </form>
+        </div>
     </div>
     <div class="main">
+        <input type="hidden" id="usernameField" th:value="${username}" />
         <nav>
             <div>
                 <label for="search-input"></label>
-                <input type="text" id="search-input" placeholder="find other user here..." />
+                <input type="text" id="search-input" placeholder="find other user here..." autocomplete="off"/>
+                <ul id="search-results"></ul>
+
             </div>
             <div class="button-usermanage-container">
                 <form th:action="@{/api/user/edit/{username}(username=${username})}" method="get">
@@ -263,6 +279,7 @@
     let username = /*[[${sender?.userDtoMin?.username} ?: 'Guest']]*/ 'Guest';
 </script>
 <script src="/script/mainPageHandler.js" defer></script>
+<script src="/script/searchBoxHandler.js"></script>
 <script>
     document.querySelectorAll('.chat-form').forEach(form => {
         form.addEventListener('submit', function(event) {
@@ -348,5 +365,50 @@
             }
         });
     }
+</script>
+<script>
+    document.querySelectorAll('.request-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            fetch('/api/user/send-request/accept', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    const mainChat = document.querySelector('.main-chat');
+                    mainChat.innerHTML = html;
+
+                })
+                .catch(error => {
+                    console.error('Error loading chat:', error);
+                });
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainChat = document.querySelector('.main-chat');
+        if (!mainChat) {
+            console.error('.main-chat element is missing from the DOM');
+            return;
+        }
+
+        // Proceed with your logic
+        console.log('Found .main-chat:', mainChat);
+    });
 </script>
 </html>

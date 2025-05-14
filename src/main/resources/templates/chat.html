@@ -126,7 +126,8 @@
              style="text-align: left; background-color: #e1f0ff; padding: 10px; margin: 5px; border-radius: 10px; color: black;">
           <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
             <div th:if="${member.getId() == message.getChatRoomMemberDtoMin().getId()}">
-              <span th:text="${member.getMemberName()}  + ': ' + ${message.getContents()}"></span>
+              <p th:text="${member.getMemberName()}"></p>
+              <span th:text= "${message.getContents()}"></span>
             </div>
           </div>
         </div>

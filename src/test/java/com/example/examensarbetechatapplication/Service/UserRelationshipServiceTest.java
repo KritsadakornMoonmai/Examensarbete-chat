@@ -111,7 +111,7 @@ class UserRelationshipServiceTest {
                 , userRepository
         );
 
-        userRelationshipService = new UserRelationshipService(userRepository);
+        userRelationshipService = new UserRelationshipService(userRelationshipRepository,userRepository);
 
         userService = new UserService(userRepository
                 , userInfoRepository

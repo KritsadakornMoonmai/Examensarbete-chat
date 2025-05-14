@@ -137,6 +137,12 @@ public class UserService implements UserDetailsService {
         return getUserDto(userRepo.findByUsername(username));
     }
 
+    public List<UserDto> getUserDtosByUsername(String username) {
+        List<User> userList = userRepo.findUsersByUsernameIsContaining(username);
+
+        return userList.stream().map(this::getUserDto).toList();
+    }
+
     public UserDtoMin getUserDtoMinByUsername(String username) {
         return getUserDtoMin(userRepo.findByUsername(username));
     }

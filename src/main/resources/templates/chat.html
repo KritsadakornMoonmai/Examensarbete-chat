@@ -138,6 +138,7 @@
       <input type="hidden" name="chatRoomId" th:value="${chatRoom?.getId() ?: 0}">
       <input type="hidden" name="senderId" th:value="${sender?.getId() ?: 0}">
       <input type="hidden" name="username" th:value="${sender?.getUserDtoMin()?.getUsername() ?: 'Guest'}">
+      <input type="hidden" name="friendUsername" th:value="${senderFriend?.getUserDtoMin()?.getUsername() ?: 'Friend'}">
 
       <label for="chat-input"></label>
       <input type="text" id="chat-input" placeholder="Type a message..." required />

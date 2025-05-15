@@ -28,11 +28,11 @@ public class User {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserInfo userInfo;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<UserRelationship> relationshipInitiated = new ArrayList<>();
 
-    @OneToMany(mappedBy = "friend")
+    @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<UserRelationship> relationshipReceived = new ArrayList<>();
 

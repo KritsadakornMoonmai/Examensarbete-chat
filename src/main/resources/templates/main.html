@@ -212,10 +212,10 @@
         <div class="dropdown-content">
             <form th:each="friend : ${friendList}" class="chat-form">
                 <input type="hidden" name="userId" th:value="${user.getId()}">
-                <input type="hidden" name="friendId" th:value="${friend.getUser().getId()}">
+                <input type="hidden" name="friendId" th:value="${friend.getId()}">
                 <input type="hidden" name="type" th:value="PRIVATE">
                 <button type="submit">
-                    <a th:text="${friend.getUser().getUsername()}"></a>
+                    <a th:text="${friend.getUsername()}"></a>
                 </button>
             </form>
         </div>
@@ -233,13 +233,16 @@
             <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content">
-            <form th:each="requestRelation : ${friendRequest}" class="request-form">
-                <input type="hidden" name="username" th:value="${user.getUsername()}">
-                <input type="hidden" name="senderUsername" th:value="${requestRelation.getFriend().getUsername()}">
-                <button type="submit">
-                    <a th:text="${requestRelation.getUser().getUsername()}"></a>
-                </button>
-            </form>
+            <div th:each="requestRelation : ${friendRequest}" class="request-form">
+                <span th:text="${requestRelation.getUser().getUsername()}"></span>
+                <form th:action="@{/api/user/send-request/accept}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="senderUsername" th:value="${requestRelation.getUser().getUsername()}">
+                    <input type="hidden" name="receiverUsername" th:value="${requestRelation.getFriend().getUsername()}">
+                    <button type="submit" name="isAccepted" style="background-color: #2c4866" value=true>Accept</button>
+                    <button type="submit" name="isAccepted" style="background-color: white" value=false>Reject</button>
+                </form>
+            </div>
         </div>
     </div>
     <div class="main">
@@ -274,9 +277,10 @@
 
 </body>
 <script>
-    let chatRoomId = /*[[${chatRoom?.id} ?: 0]]*/ 0;
-    let senderId = /*[[${sender?.id} ?: 0]]*/ 0;
-    let username = /*[[${sender?.userDtoMin?.username} ?: 'Guest']]*/ 'Guest';
+    var chatRoomId = /*[[${chatRoom?.id} ?: 0]]*/ 0;
+    var senderId = /*[[${sender?.id} ?: 0]]*/ 0;
+    var username = /*[[${sender?.userDtoMin?.username} ?: 'Guest']]*/ 'Guest';
+    var friendUsername = /*[[${senderFriend?.userDtoMin?.username} ?: 'Friend']]*/ 'Friend';
 </script>
 <script src="/script/mainPageHandler.js" defer></script>
 <script src="/script/searchBoxHandler.js"></script>
@@ -311,6 +315,7 @@
                     const newChatRoomId = mainChat.querySelector('input[name="chatRoomId"]').value || 0;
                     const newSenderId = mainChat.querySelector('input[name="senderId"]').value || 0;
                     const newUsername = mainChat.querySelector('input[name="username"]').value || 'Guest';
+                    const newFriendUsername = mainChat.querySelector('input[name="friendUsername"]').value || 'Friend';
 
                     if (!newChatRoomId || !newSenderId || !newUsername) {
                         throw new Error("Required inputs are missing in the fetched chat content");
@@ -318,12 +323,14 @@
                         console.log("chatRoomId: " + newChatRoomId);
                         console.log("senderId: " + newSenderId);
                         console.log("username: " + newUsername);
+                        console.log("friendUsername: " + newFriendUsername);
                     }
 
                     // Update global variables
                     chatRoomId = parseInt(newChatRoomId, 10);
                     senderId = parseInt(newSenderId, 10);
                     username = newUsername;
+                    friendUsername = newFriendUsername;
 
                     // Reconnect WebSocket or reinitialize functionalities if needed
                     connect(); // or any other necessary logic
@@ -365,50 +372,5 @@
             }
         });
     }
-</script>
-<script>
-    document.querySelectorAll('.request-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const formData = new FormData(form);
-
-            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
-            fetch('/api/user/send-request/accept', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    [csrfHeader]: csrfToken
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    const mainChat = document.querySelector('.main-chat');
-                    mainChat.innerHTML = html;
-
-                })
-                .catch(error => {
-                    console.error('Error loading chat:', error);
-                });
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const mainChat = document.querySelector('.main-chat');
-        if (!mainChat) {
-            console.error('.main-chat element is missing from the DOM');
-            return;
-        }
-
-        // Proceed with your logic
-        console.log('Found .main-chat:', mainChat);
-    });
 </script>
 </html>

@@ -72,21 +72,16 @@ public class ExamensarbeteChatApplication {
             userRelationship.setRelatedAt(LocalDateTime.now());
             userRelationship.setStatus(RelationshipStatus.ACCEPTED);
 
-            UserRelationship userRelationship2 = new UserRelationship();
-            userRelationship2.setUser(user2);
-            userRelationship2.setFriend(user);
-            userRelationship2.setRelatedAt(LocalDateTime.now());
-            userRelationship2.setStatus(RelationshipStatus.ACCEPTED);
 
             user.setRelationshipInitiated(List.of(userRelationship));
-            user2.setRelationshipReceived(List.of(userRelationship2));
+            user2.setRelationshipReceived(List.of(userRelationship));
 
             userRoleRepo.save(userRole1);
             userRoleRepo.save(userRole2);
 
             userRepo.saveAll(List.of(user, user2));
             userInfoRepo.saveAll(List.of(newUserInfo, newUserInfo2));
-            userRelatonRepo.saveAll(List.of(userRelationship, userRelationship2));
+            userRelatonRepo.saveAll(List.of(userRelationship));
         };
     }
 

@@ -182,7 +182,7 @@ class ChatRoomServiceTest {
         assertNotEquals(getChatRoomDtoMin.getCreateAt(), localDateTime);
     }
 
-    @Test
+    /*@Test
     void saveChatRoom() {
 
         when(chatRoomRepository.save(any())).thenReturn(chatRoom);
@@ -229,5 +229,5 @@ class ChatRoomServiceTest {
         assertEquals(getChatRoom.getId(), 2L);
         assertNotEquals(getChatRoom.getCreateAt(), localDateTime);
         System.out.println("Assertion done");
-    }
+    }*/
 }

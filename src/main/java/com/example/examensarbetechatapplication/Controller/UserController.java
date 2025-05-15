@@ -98,9 +98,6 @@ public class UserController {
     public String sendingFriendRequest(@RequestBody Map<String, String> payload) {
         String senderUsername = payload.get("senderUsername");
         String receiverUsername = payload.get("receiverUsername");
-        System.out.println("FriendRequest received");
-        System.out.println(senderUsername);
-        System.out.println(receiverUsername);
         Optional<UserDto> sender = Optional.ofNullable(userService.getUserDtoByUsername(senderUsername));
         Optional<UserDto> receiver = Optional.ofNullable(userService.getUserDtoByUsername(receiverUsername));
 
@@ -119,69 +116,58 @@ public class UserController {
                 .email(receiver.get().getEmail())
                 .build();
 
-        UserRelationshipDto userRelationshipDto1;
-        UserRelationshipDto userRelationshipDto2;
+        UserRelationshipDto userRelationshipDto;
 
-        if (userRelationshipService.findUserRelationShipIsExist(sender.get().getUsername(), receiver.get().getUsername())
-        || userRelationshipService.findUserRelationShipIsExist(receiver.get().getUsername(), sender.get().getUsername())) {
+        if (userRelationshipService.findUserRelationShipIsExist(sender.get().getUsername(), receiver.get().getUsername())) {
 
-            userRelationshipDto1 = userRelationshipService.findRelationshipByUserAndFriend(sender.get().getUsername(), receiver.get().getUsername());
-            userRelationshipDto2 = userRelationshipService.findRelationshipByUserAndFriend(receiver.get().getUsername(), sender.get().getUsername());
+            userRelationshipDto = userRelationshipService.findRelationshipByUserAndFriend(sender.get().getUsername(), receiver.get().getUsername());
 
-            if (userRelationshipDto1.getStatus() == RelationshipStatus.ACCEPTED && userRelationshipDto2.getStatus() == RelationshipStatus.ACCEPTED) {
+            if (userRelationshipDto.getStatus() == RelationshipStatus.ACCEPTED) {
                 return "redirect:/user/login/success";
             } else {
-                userRelationshipDto1.setStatus(RelationshipStatus.PENDING);
-                userRelationshipDto2.setStatus(RelationshipStatus.PENDING);
-                userRelationshipService.saveUserRelationship(List.of(userRelationshipDto1, userRelationshipDto2));
+                userRelationshipDto.setStatus(RelationshipStatus.PENDING);
+                userRelationshipService.saveUserRelationship(List.of(userRelationshipDto));
                 return "redirect:/user/login/success";
             }
         } else {
 
-            userRelationshipDto1 = new UserRelationshipDto();
-            userRelationshipDto2 = new UserRelationshipDto();
+            userRelationshipDto = new UserRelationshipDto();
 
-            userRelationshipDto1.setUser(senderDtoMin);
-            userRelationshipDto1.setFriend(receiverDtoMin);
-            userRelationshipDto1.setRelatedAt(LocalDateTime.now());
-            userRelationshipDto1.setStatus(RelationshipStatus.PENDING);
+            userRelationshipDto.setUser(senderDtoMin);
+            userRelationshipDto.setFriend(receiverDtoMin);
+            userRelationshipDto.setRelatedAt(LocalDateTime.now());
+            userRelationshipDto.setStatus(RelationshipStatus.PENDING);
 
-            userRelationshipDto2.setUser(receiverDtoMin);
-            userRelationshipDto2.setFriend(senderDtoMin);
-            userRelationshipDto2.setRelatedAt(LocalDateTime.now());
-            userRelationshipDto2.setStatus(RelationshipStatus.PENDING);
 
-            sender.get().setRelationshipInitiatedDtos(List.of(userRelationshipDto1));
-            receiver.get().setRelationshipReceivedDtos(List.of(userRelationshipDto2));
+            sender.get().setRelationshipInitiatedDtos(List.of(userRelationshipDto));
+            receiver.get().setRelationshipReceivedDtos(List.of(userRelationshipDto));
 
             userService.createUser(sender.get());
             userService.createUser(receiver.get());
-            userRelationshipService.saveUserRelationship(List.of(userRelationshipDto1, userRelationshipDto2));
+            userRelationshipService.saveUserRelationship(List.of(userRelationshipDto));
             System.out.println("FriendRequest completed");
         }
         return "redirect:/user/login/success";
     }
 
     @PostMapping("/send-request/accept")
-    public String friendRequestAccepted(@RequestParam String username, @RequestParam String senderUsername, @RequestParam boolean isAccepted) {
-        if (userRelationshipService.findUserRelationShipIsExist(username, senderUsername) && isAccepted) {
-            UserRelationshipDto userRelationshipDto1 = userRelationshipService.findRelationshipByUserAndFriend(senderUsername, username);
-            UserRelationshipDto userRelationshipDto2 = userRelationshipService.findRelationshipByUserAndFriend(username, senderUsername);
+    public String friendRequestAccepted(@RequestParam String senderUsername, @RequestParam String receiverUsername, @RequestParam boolean isAccepted) {
 
-            userRelationshipDto1.setStatus(RelationshipStatus.ACCEPTED);
-            userRelationshipDto2.setStatus(RelationshipStatus.ACCEPTED);
+        UserRelationshipDto userRelationshipDto;
 
-        } else if (userRelationshipService.findUserRelationShipIsExist(username, senderUsername) && !isAccepted) {
-            UserRelationshipDto userRelationshipDto1 = userRelationshipService.findRelationshipByUserAndFriend(senderUsername, username);
-            UserRelationshipDto userRelationshipDto2 = userRelationshipService.findRelationshipByUserAndFriend(username, senderUsername);
+        if (userRelationshipService.findUserRelationShipIsExist(senderUsername, receiverUsername) && isAccepted) {
+            userRelationshipDto = userRelationshipService.findRelationshipByUserAndFriend(senderUsername, receiverUsername);
+            userRelationshipDto.setStatus(RelationshipStatus.ACCEPTED);
 
-            userRelationshipDto1.setStatus(RelationshipStatus.REJECTED);
-            userRelationshipDto2.setStatus(RelationshipStatus.REJECTED);
+        } else if (userRelationshipService.findUserRelationShipIsExist(senderUsername, receiverUsername) && !isAccepted) {
+            userRelationshipDto = userRelationshipService.findRelationshipByUserAndFriend(senderUsername, receiverUsername);
+            userRelationshipDto.setStatus(RelationshipStatus.REJECTED);
 
         } else {
-            return null;
+            return "redirect:/user/login/success";
         }
 
+        userRelationshipService.saveUserRelationship(List.of(userRelationshipDto));
         return "redirect:/user/login/success";
     }
 

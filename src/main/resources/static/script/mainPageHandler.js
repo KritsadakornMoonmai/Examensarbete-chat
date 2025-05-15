@@ -37,7 +37,7 @@ function showMessage(message) {
     const messageElement = document.createElement('div');
 
     const isSender = message.chatRoomMemberDtoMin.id === senderId;
-    const senderUsername = isSender? username : 'Username placeholder';
+    const senderUsername = isSender? username : friendUsername;
 
     messageElement.textContent = senderUsername + ": " + message.contents;
 
@@ -62,7 +62,5 @@ function showMessage(message) {
 window.onload = function () {
     if (chatRoomId !== 0 && senderId !== 0) {
         connect();
-    } else {
-        console.error('ChatRoomId or SenderId is invalid.');
     }
 }

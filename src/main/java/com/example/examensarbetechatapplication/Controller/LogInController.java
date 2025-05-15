@@ -1,6 +1,7 @@
 package com.example.examensarbetechatapplication.Controller;
 
 import com.example.examensarbetechatapplication.DTO.UserDto;
+import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserInfoDto;
 import com.example.examensarbetechatapplication.DTO.UserRelationshipDto;
 import com.example.examensarbetechatapplication.Model.RelationshipStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Controller
@@ -48,25 +50,35 @@ public class LogInController {
                     .getUserInfoDtoMin()
                     .getId());
 
-            List<UserRelationshipDto> friendListInitialized = userDto.getRelationshipInitiatedDtos()
-                    .stream()
-                    .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.ACCEPTED && userDto.getId() != userRelationshipDto.getUser().getId()).toList();
-            List<UserRelationshipDto> friendListReceived = userDto.getRelationshipReceivedDtos()
-                    .stream()
-                    .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.ACCEPTED && userDto.getId() != userRelationshipDto.getUser().getId()).toList();
+            List<UserRelationshipDto> allAcceptedRelationships = Stream.concat(
+                            userDto.getRelationshipInitiatedDtos().stream(),
+                            userDto.getRelationshipReceivedDtos().stream()
+                    ).filter(rel -> rel.getStatus() == RelationshipStatus.ACCEPTED)
+                    .toList();
 
+
+            List<UserDtoMin> actualFriends = allAcceptedRelationships.stream()
+                    .map(rel -> {
+
+                        if (userDto.getId().equals(rel.getUser().getId())) {
+                            return rel.getFriend();
+                        } else {
+                            return rel.getUser();
+                        }
+                    })
+                    .distinct()
+                    .toList();
 
             List<UserRelationshipDto> RequestReceived = userDto.getRelationshipReceivedDtos()
                     .stream()
                     .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.PENDING).toList();
 
-            for (UserRelationshipDto req : RequestReceived) {
-                System.out.println("Fetch req receive:");
-                System.out.println("Current user: " + userDto.getUsername());
-                System.out.println("Receiver" + req.getUser().getUsername());
+            for (int i = 0; i < RequestReceived.size(); i++) {
+                System.out.println("CurrentUser: " + userDto.getUsername());
+                System.out.println("Receiver: " + RequestReceived.get(i).getUser().getUsername());
             }
 
-            List<UserRelationshipDto> mergedFriendLists = Stream.concat(friendListInitialized.stream(), friendListReceived.stream()).toList();
+
 
             if (userDto == null) {
                 model.addAttribute("message", "error");
@@ -75,7 +87,7 @@ public class LogInController {
             } else {
                 model.addAttribute("message", "success");
                 model.addAttribute("user", userDto);
-                model.addAttribute("friendList", mergedFriendLists);
+                model.addAttribute("friendList", actualFriends);
                 model.addAttribute("userInfo", userInfoDto);
                 model.addAttribute("username", userDto.getUsername());
                 model.addAttribute("friendRequest", RequestReceived);

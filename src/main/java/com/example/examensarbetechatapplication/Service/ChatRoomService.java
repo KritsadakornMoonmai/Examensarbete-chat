@@ -10,7 +10,6 @@ import com.example.examensarbetechatapplication.Repository.ChatRoomRepository;
 import com.example.examensarbetechatapplication.Repository.MessageRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.util.Optionals;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -124,17 +123,19 @@ public class ChatRoomService {
         }
     }
 
-    public void saveChatRoom(ChatRoomDto chatRoomDto, List<ChatRoomMember> chatRoomMember) {
+    public ChatRoomDto saveChatRoom(ChatRoomDto chatRoomDto, List<ChatRoomMember> chatRoomMember) {
         ChatRoom newChatRoom = getChatRoomFromDto(chatRoomDto, chatRoomMember);
         System.out.println("newChatRoom saving " + newChatRoom.getName());
-        chatRoomRepo.save(newChatRoom);
+        return getChatRoomDto(chatRoomRepo.save(newChatRoom));
     }
 
     public Optional<ChatRoomDto> getChatRoomByUserAndFriend(UUID userId, UUID friendId, ChatRoomTypes chatRoomTypes) {
-        ChatRoomMember user1 = chatRoomMemberRepo.findChatRoomMemberByUserId(userId);
-        ChatRoomMember user2 = chatRoomMemberRepo.findChatRoomMemberByUserId(friendId);
+        List<ChatRoomMember> user1MemList = chatRoomMemberRepo.findChatRoomMembersByUserId(userId);
+        List<ChatRoomMember> user2MemList = chatRoomMemberRepo.findChatRoomMembersByUserId(friendId);
 
-        if (user1 == null || user2 == null || chatRoomTypes == null) {
+
+
+        if (user1MemList.isEmpty() || user2MemList.isEmpty() || chatRoomTypes == null) {
             return Optional.empty();
         }
         List<UUID> chatRoomMemberIdList = List.of(userId, friendId);

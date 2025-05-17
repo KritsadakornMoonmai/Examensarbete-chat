@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -100,6 +101,14 @@ public class ChatRoomMemberService {
         chatRoomMember.setRoles(roles);
 
         return chatRoomMember;
+    }
+
+    public List<ChatRoomMemberDto> getChatRoomMemberDtosByUserId(UUID userId) {
+
+        return chatRoomMemberRepo.findChatRoomMembersByUserId(userId)
+                .stream()
+                .map(this::getChatMemberDto)
+                .toList();
     }
 
     public void saveChatRoomMember(ChatRoomMemberDto chatRoomMemberDto) {

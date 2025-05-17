@@ -139,9 +139,10 @@ public class ChatRoomService {
             return Optional.empty();
         }
         List<UUID> chatRoomMemberIdList = List.of(userId, friendId);
-        List<ChatRoom> chatRoomList = chatRoomRepo.findChatRoomWithExactMembersByUserIds(chatRoomMemberIdList, chatRoomMemberIdList.size());
+        List<ChatRoom> chatRoomList = chatRoomRepo.findChatRoomWithExactMembersByUserIds(chatRoomMemberIdList, chatRoomMemberIdList.size()).stream()
+                .filter(chatRoom -> chatRoom.getChatRoomTypes() == ChatRoomTypes.PRIVATE).toList();
 
-        if (chatRoomList == null) {
+        if (chatRoomList.isEmpty()) {
             return Optional.empty();
         } else {
             ChatRoom chatRoom = chatRoomList.get(0);

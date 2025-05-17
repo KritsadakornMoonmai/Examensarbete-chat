@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (keyword.length === 0) {
             resultsList.innerHTML = '';
+            resultsList.style.display = 'none';
             return;
         }
 
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.forEach(item => {
                     const li = document.createElement('li');
                     li.textContent = item.username; // Adjust if using objects
+                    resultsList.style.display = 'block';
                     li.addEventListener('click', () => {
                         // Example: sending username to server with fetch POST
                         fetch('/api/user/send_request', {

@@ -111,22 +111,21 @@
 </head>
 <body>
 <div class="chat-container" th:fragment="content">
-  <div class="head-bar" th:text="${chatRoom.getName()}">
-  </div>
+  <div class="head-bar" th:if="${chatRoom.chatRoomTypes == chatRoomTypes.PRIVATE}" th:text="${sender.userDtoMin.username} +', '+${senderFriend.userDtoMin.username}"></div>
+  <div class="head-bar" th:if="${chatRoom.chatRoomTypes == chatRoomTypes.GROUP}" th:text="${chatRoom.getName()}"></div>
   <div class="chatbox-container">
     <div class="chat-display" id="chat-display">
       <div th:each="message : ${messages}">
-        <!-- Current user's messages -->
-        <div th:if="${message.getChatRoomMemberDtoMin.getId() == sender.getId()}"
+        <div th:if="${message.getChatRoomMemberDtoMin().getId() == sender.getId()}"
              style="text-align: right; background-color: #dcf8c6; padding: 10px; margin: 5px; border-radius: 10px; color: black;">
-          <span th:text="${sender.getUserDtoMin().getUsername()} + ': ' + ${message.getContents()}"></span>
+          <p th:text="${sender.getUserDtoMin().getUsername()} + ': '"></p>
+          <span th:text="${message.getContents()}"></span>
         </div>
-        <!-- Other users' messages -->
-        <div th:if="${message.getChatRoomMemberDtoMin.getId() != sender.getId()}"
+        <div th:if="${message.getChatRoomMemberDtoMin().getId() != sender.getId()}"
              style="text-align: left; background-color: #e1f0ff; padding: 10px; margin: 5px; border-radius: 10px; color: black;">
           <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
             <div th:if="${member.getId() == message.getChatRoomMemberDtoMin().getId()}">
-              <p th:text="${member.getMemberName()}"></p>
+              <p th:text="${member.getMemberName()} + ': '"></p>
               <span th:text= "${message.getContents()}"></span>
             </div>
           </div>
@@ -138,12 +137,13 @@
       <input type="hidden" name="chatRoomId" th:value="${chatRoom?.getId() ?: 0}">
       <input type="hidden" name="senderId" th:value="${sender?.getId() ?: 0}">
       <input type="hidden" name="username" th:value="${sender?.getUserDtoMin()?.getUsername() ?: 'Guest'}">
-      <input type="hidden" name="friendUsername" th:value="${senderFriend?.getUserDtoMin()?.getUsername() ?: 'Friend'}">
 
       <label for="chat-input"></label>
       <input type="text" id="chat-input" placeholder="Type a message..." required />
       <button class="chat-button" type="submit">Send</button>
+      <button th:if="${chatRoom.chatRoomTypes == chatRoomTypes.GROUP}" class="chat-button" type="button">Add</button>
     </form>
+
   </div>
 </div>
 </body>

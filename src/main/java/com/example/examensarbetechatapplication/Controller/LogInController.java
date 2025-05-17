@@ -1,11 +1,12 @@
 package com.example.examensarbetechatapplication.Controller;
 
-import com.example.examensarbetechatapplication.DTO.UserDto;
-import com.example.examensarbetechatapplication.DTO.UserDtoMin;
-import com.example.examensarbetechatapplication.DTO.UserInfoDto;
-import com.example.examensarbetechatapplication.DTO.UserRelationshipDto;
+import com.example.examensarbetechatapplication.DTO.*;
+import com.example.examensarbetechatapplication.Model.ChatRoom;
+import com.example.examensarbetechatapplication.Model.ChatRoomTypes;
 import com.example.examensarbetechatapplication.Model.RelationshipStatus;
 import com.example.examensarbetechatapplication.Model.UserRelationship;
+import com.example.examensarbetechatapplication.Service.ChatRoomMemberService;
+import com.example.examensarbetechatapplication.Service.ChatRoomService;
 import com.example.examensarbetechatapplication.Service.UserInfoService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,8 @@ public class LogInController {
 
     final private UserService userService;
     final private UserInfoService userInfoService;
+    final private ChatRoomService chatRoomService;
+    final private ChatRoomMemberService chatRoomMemberService;
 
     @GetMapping("/login/")
     public String userLogin() {
@@ -73,21 +76,24 @@ public class LogInController {
                     .stream()
                     .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.PENDING).toList();
 
-            for (int i = 0; i < RequestReceived.size(); i++) {
-                System.out.println("CurrentUser: " + userDto.getUsername());
-                System.out.println("Receiver: " + RequestReceived.get(i).getUser().getUsername());
-            }
+            List<ChatRoomMemberDto> chatRoomMemberDtos = chatRoomMemberService.getChatRoomMemberDtosByUserId(userDto.getId());
 
+            List<ChatRoomDto> chatRoomDtos = chatRoomMemberDtos
+                    .stream()
+                    .map(chatRoomMemberDto -> chatRoomService.getChatRoomDtoById(chatRoomMemberDto.getChatRoomDtoMin().getId()))
+                    .toList();
 
+            List<ChatRoomDto> filteredChatRoom = chatRoomDtos.stream().filter(chatRoomDto -> chatRoomDto.getChatRoomTypes() == ChatRoomTypes.GROUP).toList();
 
             if (userDto == null) {
                 model.addAttribute("message", "error");
                 model.addAttribute("status", "UserNotFound");
                 return "redirect:/user/login/";
             } else {
-                model.addAttribute("message", "success");
+                //model.addAttribute("message", "success");
                 model.addAttribute("user", userDto);
                 model.addAttribute("friendList", actualFriends);
+                model.addAttribute("groupChatList", filteredChatRoom);
                 model.addAttribute("userInfo", userInfoDto);
                 model.addAttribute("username", userDto.getUsername());
                 model.addAttribute("friendRequest", RequestReceived);

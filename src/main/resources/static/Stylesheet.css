@@ -109,6 +109,7 @@ input[type="text"] {
     position: absolute;
     background: white;
     width: 200px;
+    display: none;
 }
 
 #search-results li {
@@ -120,4 +121,27 @@ input[type="text"] {
 #search-results li:hover {
     background-color: #f0f0f0;
     color: #1f5b83;
+}
+
+#addGroupChatForm {
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 35%;
+    background: #0a1e2c;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 999;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.request-btn {
+    display: block;
+    padding: 10px;
+    font-size: 12px !important;
+}
+
+.search-inp {
+    margin: 5px;
 }

@@ -76,6 +76,11 @@ public class MessageService {
         return getMessageByOwnerAndChatRoom(chatRoomMember, chatRoom);
     }
 
+    public MessageDto getMessageDtoById(long id) {
+        Message message = messageRepo.findById(id).orElseThrow(() -> new RuntimeException("Message not found"));
+        return getMessageDto(message);
+    }
+
     public MessageDto getMessageByOwnerAndChatRoom(ChatRoomMember chatRoomMember, ChatRoom chatRoom) {
         Message getMessage = messageRepo.getMessageByChatRoomMemberAndChatRoom(chatRoomMember, chatRoom);
         return getMessageDto(getMessage);

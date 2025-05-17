@@ -12,7 +12,6 @@ function connect(event) {
         });
 
     });
-    console.log('Connected: chatRoomId:', chatRoomId, 'senderId:', senderId, 'username:', username);
 }
 
 function sendMessage(event) {
@@ -22,7 +21,7 @@ function sendMessage(event) {
         const chatMessage = {
             contents: content,
             chatRoomDtoMin: { id: chatRoomId },
-            chatRoomMemberDtoMin: { id: senderId }
+            chatRoomMemberDtoMin: { id: senderId, memberName: username }
         };
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         document.getElementById('chat-input').value = '';
@@ -37,7 +36,8 @@ function showMessage(message) {
     const messageElement = document.createElement('div');
 
     const isSender = message.chatRoomMemberDtoMin.id === senderId;
-    const senderUsername = isSender? username : friendUsername;
+    //const senderUsername = isSender? username : friendUsername;
+    const senderUsername = message.chatRoomMemberDtoMin.memberName;
 
     messageElement.textContent = senderUsername + ": " + message.contents;
 

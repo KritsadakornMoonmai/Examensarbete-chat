@@ -1,5 +1,6 @@
 package com.example.examensarbetechatapplication.Repository;
 
+import com.example.examensarbetechatapplication.DTO.ChatRoomDto;
 import com.example.examensarbetechatapplication.Model.ChatRoom;
 import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.ChatRoomTypes;

@@ -1,11 +1,11 @@
 
 
-function showPopup() {
-    document.getElementById("addGroupChatForm").style.display = "block";
+function showPopup(element) {
+    document.getElementById(element).style.display = "block";
 }
 
-function hidePopup() {
-    document.getElementById("addGroupChatForm").style.display = "none";
+function hidePopup(element) {
+    document.getElementById(element).style.display = "none";
 }
 
 const selectedFriendIds = new Set();

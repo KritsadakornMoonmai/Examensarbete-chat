@@ -9,6 +9,7 @@ import com.example.examensarbetechatapplication.Service.UserInfoService;
 import com.example.examensarbetechatapplication.Service.UserRelationshipService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.valves.rewrite.InternalRewriteMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,14 +53,73 @@ public class UserController {
     @GetMapping("/search")
     @ResponseBody
     public List<UserDto> getUserByName(@RequestParam String query, @RequestParam String username) {
-        System.out.println("From: " + username);
+        Optional<UserDto> senderUser = Optional.ofNullable(userService.getUserDtoByUsername(username));
+
+        if (senderUser.isEmpty()) {
+            return null;
+        }
         List<UserDto> userDtos = userService.getUserDtosByUsername(query)
                 .stream()
                 .filter(userDto -> !Objects.equals(username, userDto.getUsername()))
                 .toList();
-        System.out.println("Searched: "+userDtos.get(0).getUsername());
 
-        return userDtos;
+        return userDtos
+                .stream()
+                .filter(userDto -> {
+                    UserRelationshipDto userRelationshipDto;
+                    boolean isUserInRelationship = userRelationshipService.findUserRelationShipIsExist(senderUser.get().getUsername(), userDto.getUsername());
+                    System.out.println("Sender: " + senderUser.get().getUsername());
+                    System.out.println("Receiver" + userDto.getUsername());
+                    System.out.println("Is user relationship exist: " + isUserInRelationship);
+                    if (isUserInRelationship) {
+                        userRelationshipDto = userRelationshipService.findRelationshipByUserAndFriend(senderUser.get().getUsername(), userDto.getUsername());
+                        return userRelationshipDto.getStatus() == RelationshipStatus.REJECTED;
+                    } else {
+                        return true;
+                    }
+                })
+                .toList();
+    }
+
+    private boolean checkValidUsername(String username){
+        int minChar = 4;
+        int maxChar = 12;
+
+        int usernameLength = username.length();
+        boolean usernameContainsUpperCase = false;
+
+        for (char character : username.toCharArray()) {
+            if (Character.isUpperCase(character)) {
+                usernameContainsUpperCase = true;
+                break;
+            }
+        }
+        return usernameLength >= minChar && usernameLength <= maxChar && usernameContainsUpperCase;
+    }
+
+    private boolean checkValidPassword(String password) {
+        int minChar = 4;
+        int maxChar = 12;
+
+        int pwLen = password.length();
+        boolean pwContainsUppercase = false;
+        boolean pwContainsNumber = false;
+
+        for (char character : password.toCharArray()) {
+            if (Character.isUpperCase(character)) {
+                pwContainsUppercase = true;
+                break;
+            }
+        }
+
+        for (char character : password.toCharArray()) {
+            if (Character.isDigit(character)) {
+                pwContainsNumber = true;
+                break;
+            }
+        }
+
+        return pwLen >= minChar && pwLen <= maxChar && pwContainsUppercase && pwContainsNumber;
     }
 
     @PostMapping("/create")
@@ -70,6 +130,14 @@ public class UserController {
 
         if (userService.findIfUserOrEmailExist(username, email)) {
             model.addAttribute("RegisterMessage", "Cannot create account due to information already exist");
+            return "registerForm";
+        } else if (!checkValidUsername(username)) {
+            model.addAttribute("RegisterMessage", "Cannot create account due to invalid username or password");
+            model.addAttribute("usernameMessage", "Username must include at least 4 to 12 characters and contains at least 1 uppercase character");
+            return "registerForm";
+        } else if (!checkValidPassword(password)) {
+            model.addAttribute("RegisterMessage", "Cannot create account due to invalid username or password");
+            model.addAttribute("passwordMessage", "Password must include at least 4 to 12 characters, at least 1 number character, and contains at least 1 uppercase character");
             return "registerForm";
         } else {
             String bcryptPassword = new BCryptPasswordEncoder().encode(password);

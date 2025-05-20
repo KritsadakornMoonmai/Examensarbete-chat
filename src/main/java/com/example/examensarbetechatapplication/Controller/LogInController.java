@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Controller
@@ -44,58 +45,59 @@ public class LogInController {
     }
 
     @GetMapping("/login/success")
-    public String userSuccessfulLogIn(Model model, Principal principal) {
+    public String userSuccessfulLogIn(@RequestParam(value = "error", required = false) String error, Model model, Principal principal) {
 
         try {
             String fetchUsername = principal.getName();
-            UserDto userDto = userService.getUserDtoByUsername(fetchUsername);
-            UserInfoDto userInfoDto = userInfoService.getUserInfoDtoById(userService.getUserDtoById(userDto.getId())
-                    .getUserInfoDtoMin()
-                    .getId());
-
-            List<UserRelationshipDto> allAcceptedRelationships = Stream.concat(
-                            userDto.getRelationshipInitiatedDtos().stream(),
-                            userDto.getRelationshipReceivedDtos().stream()
-                    ).filter(rel -> rel.getStatus() == RelationshipStatus.ACCEPTED)
-                    .toList();
-
-
-            List<UserDtoMin> actualFriends = allAcceptedRelationships.stream()
-                    .map(rel -> {
-
-                        if (userDto.getId().equals(rel.getUser().getId())) {
-                            return rel.getFriend();
-                        } else {
-                            return rel.getUser();
-                        }
-                    })
-                    .distinct()
-                    .toList();
-
-            List<UserRelationshipDto> RequestReceived = userDto.getRelationshipReceivedDtos()
-                    .stream()
-                    .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.PENDING).toList();
-
-            List<ChatRoomMemberDto> chatRoomMemberDtos = chatRoomMemberService.getChatRoomMemberDtosByUserId(userDto.getId());
-
-            List<ChatRoomDto> chatRoomDtos = chatRoomMemberDtos
-                    .stream()
-                    .map(chatRoomMemberDto -> chatRoomService.getChatRoomDtoById(chatRoomMemberDto.getChatRoomDtoMin().getId()))
-                    .toList();
-
-            List<ChatRoomDto> filteredChatRoom = chatRoomDtos.stream().filter(chatRoomDto -> chatRoomDto.getChatRoomTypes() == ChatRoomTypes.GROUP).toList();
-
-            if (userDto == null) {
-                model.addAttribute("message", "error");
-                model.addAttribute("status", "UserNotFound");
+            Optional<UserDto> userDto = Optional.ofNullable(userService.getUserDtoByUsername(fetchUsername));
+            if (userDto.isEmpty()) {
+                model.addAttribute("statusMessage", "error");
+                model.addAttribute("status", "Username or password is incorrect");
                 return "redirect:/user/login/";
             } else {
+                UserInfoDto userInfoDto = userInfoService.getUserInfoDtoById(userService.getUserDtoById(userDto.get().getId())
+                        .getUserInfoDtoMin()
+                        .getId());
+
+                List<UserRelationshipDto> allAcceptedRelationships = Stream.concat(
+                                userDto.get().getRelationshipInitiatedDtos().stream(),
+                                userDto.get().getRelationshipReceivedDtos().stream()
+                        ).filter(rel -> rel.getStatus() == RelationshipStatus.ACCEPTED)
+                        .toList();
+
+
+                List<UserDtoMin> actualFriends = allAcceptedRelationships.stream()
+                        .map(rel -> {
+
+                            if (userDto.get().getId().equals(rel.getUser().getId())) {
+                                return rel.getFriend();
+                            } else {
+                                return rel.getUser();
+                            }
+                        })
+                        .distinct()
+                        .toList();
+
+                List<UserRelationshipDto> RequestReceived = userDto.get().getRelationshipReceivedDtos()
+                        .stream()
+                        .filter(userRelationshipDto -> userRelationshipDto.getStatus() == RelationshipStatus.PENDING).toList();
+
+                List<ChatRoomMemberDto> chatRoomMemberDtos = chatRoomMemberService.getChatRoomMemberDtosByUserId(userDto.get().getId());
+
+                List<ChatRoomDto> chatRoomDtos = chatRoomMemberDtos
+                        .stream()
+                        .map(chatRoomMemberDto -> chatRoomService.getChatRoomDtoById(chatRoomMemberDto.getChatRoomDtoMin().getId()))
+                        .toList();
+
+                List<ChatRoomDto> filteredChatRoom = chatRoomDtos.stream().filter(chatRoomDto -> chatRoomDto.getChatRoomTypes() == ChatRoomTypes.GROUP).toList();
+
+
                 //model.addAttribute("message", "success");
-                model.addAttribute("user", userDto);
+                model.addAttribute("user", userDto.get());
                 model.addAttribute("friendList", actualFriends);
                 model.addAttribute("groupChatList", filteredChatRoom);
                 model.addAttribute("userInfo", userInfoDto);
-                model.addAttribute("username", userDto.getUsername());
+                model.addAttribute("username", userDto.get().getUsername());
                 model.addAttribute("friendRequest", RequestReceived);
                 return "main";
             }

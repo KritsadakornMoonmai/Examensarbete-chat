@@ -46,7 +46,6 @@ public class ChatRoomController {
 
         ChatRoomTypes chatRoomTypes;
         Optional<ChatRoomDto> chatRoomDto;
-        System.out.println("type: " + type);
         if (Objects.equals(type, "PRIVATE")) {
             chatRoomTypes = ChatRoomTypes.PRIVATE;
             chatRoomDto = chatRoomService.getChatRoomByUserAndFriend(userId, friendId, chatRoomTypes);
@@ -127,13 +126,13 @@ public class ChatRoomController {
         model.addAttribute("chatRoom", getFinalChatRoom);
         model.addAttribute("messages", messageList);
         model.addAttribute("chatRoomTypes", ChatRoomTypes.class);
+        model.addAttribute("roles", Roles.class);
 
         return "chat :: content";
     }
 
     @GetMapping("/fetchGroup")
     public String getChatRoomGroup(@RequestParam Long chatRoomId, @RequestParam UUID userId, Model model) {
-        System.out.println("Begin fetch group:" + chatRoomId);
         Optional<ChatRoomDto> chatRoomDto = Optional.ofNullable(chatRoomService.getChatRoomDtoById(chatRoomId));
         List<MessageDto> messageDtos;
         Optional<UserDto> userDto = Optional.ofNullable(userService.getUserDtoById(userId));
@@ -162,12 +161,11 @@ public class ChatRoomController {
                     .findFirst()
                     .orElse(null);
 
-            System.out.println("Fetch group chat: " + chatRoomDto.get().getName());
-            System.out.println("Fetch group mem1: " + chatRoomDto.get().getChatRoomMemberDtoMins().get(0).getMemberName());
             model.addAttribute("chatRoom", chatRoomDto.get());
             model.addAttribute("messages", messageDtos);
             model.addAttribute("sender", Objects.requireNonNull(sender));
             model.addAttribute("chatRoomTypes", ChatRoomTypes.class);
+            model.addAttribute("roles", Roles.class);
             return "chat :: content";
         }
     }

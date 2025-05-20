@@ -57,6 +57,8 @@ function showMessage(message) {
     messageElement.style.borderRadius = '10px';
     messageElement.style.color= 'black';
     messageArea.appendChild(messageElement);
+
+    messageArea.scrollTop = messageArea.scrollHeight;
 }
 
 window.onload = function () {

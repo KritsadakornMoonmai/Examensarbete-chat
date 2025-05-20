@@ -6,23 +6,86 @@
     <link th:rel="stylesheet" th:href="@{/Stylesheet.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Register</title>
+    <style>
+        .container {
+            background-color: #1b1b1b;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-register {
+            width: fit-content;
+            background-color: #0a1e2c;
+            border: solid white;
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+        }
+
+        .input-sector {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 0 auto;
+
+        }
+
+        .input-sector label{
+            margin-bottom: 2px;
+        }
+
+        .input-sector input {
+            width: max-content;
+            height: 5vh;
+        }
+
+        .request-btn {
+            border-radius: 5px;
+            padding: 15px;
+            border-style: hidden;
+        }
+
+        .submit {
+            background-color: #2a7aaf;
+            color: white;
+        }
+        .cancel {
+            background-color: red;
+            color: white;
+        }
+
+        .warning-message {
+            color: crimson;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h2>Register to ChatApp</h2>
-    <form th:action="@{/api/user/create}" method="post">
-        <label for="username">Username: </label><br>
-        <input type="text" id="username" name="username" required><br>
-        <label for="password">Password: </label><br>
-        <input type="password" id="password" name="password" required><br>
-        <label for="email">Email: </label><br>
-        <input type="email" id="email" name="email" required><br><br>
-        <div>
-            <button type="submit">Submit</button>
-            <button type="button" onclick="window.history.back()">Go back</button>
-        </div>
-        <div th:if="${RegisterMessage != null}" th:text="${RegisterMessage}" class="alert"></div>
-    </form>
+    <div class="form-register">
+        <h2>Register to ChatApp</h2>
+        <form th:action="@{/api/user/create}" method="post">
+            <div class="input-sector">
+                <label for="username">Username: </label><br>
+                <input type="text" id="username" name="username" required><br>
+                <span class="warning-message" th:if="${usernameMessage != null}" th:text="${usernameMessage}" ></span>
+
+                <label for="password">Password: </label><br>
+                <input type="password" id="password" name="password" required><br>
+                <span class="warning-message" th:if="${passwordMessage != null}" th:text="${passwordMessage}"></span>
+
+                <label for="email">Email: </label><br>
+                <input type="email" id="email" name="email" required><br><br>
+            </div><br>
+            <div>
+                <button class="request-btn submit" type="submit">Submit</button>
+                <button class="request-btn cancel" type="button" onclick="window.history.back()">Go back</button>
+            </div>
+            <div class="warning-message" th:if="${RegisterMessage != null}" th:text="${RegisterMessage}"></div>
+        </form>
+    </div>
 </div>
 </body>
 </html>

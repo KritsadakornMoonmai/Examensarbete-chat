@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,9 +76,9 @@ public class UserRelationshipService {
         User sender = userRepo.findByUsername(senderUsername);
         User receiver = userRepo.findByUsername(receiverUsername);
 
-        UserRelationship userRelationship = userRelationshipRepo.findUserRelationshipByUserAndFriend(sender, receiver);
+        Optional<UserRelationship> userRelationship = Optional.ofNullable(userRelationshipRepo.findUserRelationshipByUserAndFriend(sender, receiver));
 
-        return getUserRelationshipDtoFull(userRelationship);
+        return getUserRelationshipDtoFull(userRelationship.get());
     }
 
 }

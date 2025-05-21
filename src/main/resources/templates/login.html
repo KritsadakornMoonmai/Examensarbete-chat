@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link th:rel="stylesheet" th:href="@{/bootstrap.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -104,11 +105,15 @@
                 <div th:if="${statusMessage} == 'error'">
                     <span th:text="${status}" class="alert-warning"></span>
                 </div>
-                <div class=>
+                <div>
+                    <div class="g-recaptcha" data-sitekey="6LdWwUErAAAAAKssIuWf_5ziTthMMEOAnH96wKXc"></div>
                     <button class="logging-btn" type="submit">Log in</button>
                 </div>
 
             </form>
+            <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit"
+                    async defer>
+            </script>
             <br>
             <div>
                 <a th:href="@{/user/register}">register</a>
@@ -117,6 +122,8 @@
     </div>
 </body>
 </html>
-<script>
-
+<script type="text/javascript">
+    var onloadCallback = function() {
+        alert("grecaptcha is ready!");
+    };
 </script>

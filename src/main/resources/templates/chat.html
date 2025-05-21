@@ -149,9 +149,9 @@
         <hr>
         <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
           <p th:text="${member.getMemberName()}"></p>
-          <button th:if="${sender.roles == roles.ADMIN}" class="request-btn" type="button">remove</button>
+          <!--<button th:if="${sender.roles == roles.ADMIN}" class="request-btn" type="button">remove</button>-->
         </div>
-        <button th:if="${sender.roles == roles.ADMIN}" class="request-btn" type="button">Add</button>
+        <!--<button th:if="${sender.roles == roles.ADMIN}" class="request-btn" type="button">Add</button>-->
         <button class="request-btn" type="button" onclick="hidePopup('memberListForm')">Close</button>
       </div>
     </form>

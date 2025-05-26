@@ -13,6 +13,7 @@ function fetchList() {
         .then(data => {
             const container = document.getElementById('friendsListContainer');
             container.innerHTML = '';
+            container.className = 'memberList';
 
             if (data.length === 0) {
                 container.innerHTML = '<p>No friends available to invite.</p>';
@@ -20,10 +21,13 @@ function fetchList() {
             }
 
             data.forEach(friend => {
+                const text = document.createElement('p');
                 const btn = document.createElement('button');
-                btn.textContent = `Invite ${friend.username}`;
-                btn.className = 'invite-button';
+                text.textContent = `${friend.username}`;
+                btn.textContent = `Invite`;
+                btn.className = 'invite-button request-btn submit';
                 btn.onclick = () => inviteUserToChat(friend.id, chatRoomId, friend.username);
+                container.appendChild(text);
                 container.appendChild(btn);
             });
 

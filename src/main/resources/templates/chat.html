@@ -56,7 +56,7 @@
       background-color: black;
     }
 
-    .message-wrapper {
+    /*.message-wrapper {
       display: flex;
       width: 100%;
     }
@@ -78,7 +78,7 @@
       background-color: #e1f0ff;
       margin-right: auto;
       text-align: left;
-    }
+    }*/
 
     #chat-form {
       display: flex;
@@ -119,17 +119,30 @@
   <div class="chatbox-container">
     <div class="chat-display" id="chat-display">
       <div th:each="message : ${messages}">
-        <div th:if="${message.getChatRoomMemberDtoMin().getId() == sender.getId()}"
-             style="text-align: right; background-color: #dcf8c6; padding: 10px; margin: 5px; border-radius: 10px; color: black;">
-          <p th:text="${sender.getUserDtoMin().getUsername()} + ': '"></p>
-          <span th:text="${message.getContents()}"></span>
+        <div class="message-wrapper sender">
+          <div th:if="${message.getChatRoomMemberDtoMin().getId() == sender.getId()}"
+              class="chat-message right">
+            <div class="chat-header">
+              <img class="profile-img" th:src="@{/api/user/edit/image/{username}(username=${sender.userDtoMin.username})}"  alt="N/A"/>
+              <p class="username" th:text="${sender.getUserDtoMin().getUsername()}"></p>
+            </div>
+            <div class="chat-body">
+              <span th:text="${message.getContents()}"></span>
+            </div>
+          </div>
         </div>
-        <div th:if="${message.getChatRoomMemberDtoMin().getId() != sender.getId()}"
-             style="text-align: left; background-color: #e1f0ff; padding: 10px; margin: 5px; border-radius: 10px; color: black;">
-          <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
-            <div th:if="${member.getId() == message.getChatRoomMemberDtoMin().getId()}">
-              <p th:text="${member.getMemberName()} + ': '"></p>
-              <span th:text= "${message.getContents()}"></span>
+
+        <div class="message-wrapper receiver">
+          <div th:if="${message.getChatRoomMemberDtoMin().getId() != sender.getId()}"
+               class="chat-message left">
+            <div class="chat-header">
+              <img class="profile-img"
+                 th:src="@{/api/user/edit/image/{username}(username=${message.getChatRoomMemberDtoMin().getMemberName()})}" alt="N/A" />
+
+              <p class="username" th:text="${message.getChatRoomMemberDtoMin().getMemberName()}"></p>
+            </div>
+            <div class="chat-body">
+              <span th:text="${message.getContents()}"></span>
             </div>
           </div>
         </div>
@@ -149,13 +162,15 @@
       <h5>Members: </h5>
       <hr>
       <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
-        <p th:text="${member.getMemberName()}"></p>
-        <form th:action="@{/api/chatroom/delete}" method="post">
-          <input type="hidden" name="chatRoomId" th:value="${chatRoom?.getId() ?: 0}">
-          <input type="hidden" name="chatRoomMemberId" th:value="${member?.getId() ?: 0}">
-
-          <button th:if="${sender.roles == roles.ADMIN && sender.id != member.id}" class="request-btn" type="submit">remove</button>
-        </form>
+        <div class="memberList">
+          <p th:text="${member.getMemberName()}"></p>
+          <form th:action="@{/api/chatroom/delete}" method="post">
+            <input type="hidden" name="chatRoomId" th:value="${chatRoom?.getId() ?: 0}">
+            <input type="hidden" name="chatRoomMemberId" th:value="${member?.getId() ?: 0}">
+            <button th:if="${sender.roles == roles.ADMIN && sender.id != member.id}" class="request-btn reject" type="submit">Remove</button>
+            <button th:if="${sender.roles == roles.MEMBER && sender.id == member.id}" class="request-btn reject" type="submit">Leave</button>
+          </form>
+        </div>
       </div>
 
 

@@ -270,7 +270,9 @@ public class UserController {
             getUserInfoDto.setFullName(fullName);
             getUserInfoDto.setAge(age);
             getUserInfoDto.setTelephoneNumber(telephoneNumber);
-            getUserInfoDto.setProfileImage(imageBytes);
+            if (!file.isEmpty()) {
+                getUserInfoDto.setProfileImage(imageBytes);
+            }
 
             userService.createUser(getUserDto);
             userInfoService.createUserInfo(getUserInfoDto);

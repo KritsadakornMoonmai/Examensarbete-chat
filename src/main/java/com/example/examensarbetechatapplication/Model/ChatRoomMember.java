@@ -31,7 +31,7 @@ public class ChatRoomMember {
     @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 
-    @OneToMany(mappedBy = "chatRoomMember")
+    @OneToMany(mappedBy = "chatRoomMember", cascade = CascadeType.REMOVE)
     @JsonIgnore
     private List<Message> messages;
 

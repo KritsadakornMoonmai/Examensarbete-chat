@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface UserRoleRepository extends CrudRepository<UserRole, UUID> {
     UserRole findUserRoleByRole(String role);
+    boolean existsUserRoleByRole(String role);
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -111,9 +112,11 @@ public class ChatRoomMemberService {
                 .toList();
     }
 
-    public void saveChatRoomMember(ChatRoomMemberDto chatRoomMemberDto) {
-        ChatRoomMember chatRoomMember = getChatRoomMemberFromDto(chatRoomMemberDto);
-        chatRoomMemberRepo.save(chatRoomMember);
+    public ChatRoomMemberDto getMemberByUserAndChatRoom(Long chatRoomId, UUID userId) {
+        Optional<ChatRoomMember> getChatMem = Optional.ofNullable(chatRoomMemberRepo.findChatRoomMemberByChatRoom_IdAndUser_Id(chatRoomId, userId));
+        return getChatMem.map(this::getChatMemberDto).orElse(null);
+
+
     }
 
 }

@@ -1,10 +1,12 @@
 package com.example.examensarbetechatapplication.Controller;
 
 import com.example.examensarbetechatapplication.DTO.*;
+import com.example.examensarbetechatapplication.Model.ChatRoomMember;
 import com.example.examensarbetechatapplication.Model.RelationshipStatus;
 import com.example.examensarbetechatapplication.Model.UserRelationship;
 import com.example.examensarbetechatapplication.Model.UserRole;
 import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
+import com.example.examensarbetechatapplication.Service.ChatRoomService;
 import com.example.examensarbetechatapplication.Service.UserInfoService;
 import com.example.examensarbetechatapplication.Service.UserRelationshipService;
 import com.example.examensarbetechatapplication.Service.UserService;
@@ -25,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/api/user")
@@ -39,6 +42,9 @@ public class UserController {
 
     @Autowired
     private UserRelationshipService userRelationshipService;
+
+    @Autowired
+    private ChatRoomService chatRoomService;
 
     @GetMapping("/lists")
     public @ResponseBody List<UserDto> getAllUsers() {
@@ -68,9 +74,6 @@ public class UserController {
                 .filter(userDto -> {
                     UserRelationshipDto userRelationshipDto;
                     boolean isUserInRelationship = userRelationshipService.findUserRelationShipIsExist(senderUser.get().getUsername(), userDto.getUsername());
-                    System.out.println("Sender: " + senderUser.get().getUsername());
-                    System.out.println("Receiver" + userDto.getUsername());
-                    System.out.println("Is user relationship exist: " + isUserInRelationship);
                     if (isUserInRelationship) {
                         userRelationshipDto = userRelationshipService.findRelationshipByUserAndFriend(senderUser.get().getUsername(), userDto.getUsername());
                         return userRelationshipDto.getStatus() == RelationshipStatus.REJECTED;
@@ -298,8 +301,6 @@ public class UserController {
         headers.setContentType(MediaType.IMAGE_JPEG); // or detect dynamically
         return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
     }
-
-
 
     @DeleteMapping("/delete")
     public String deleteUser(@RequestParam String username) {

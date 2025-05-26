@@ -46,42 +46,54 @@ public class ExamensarbeteChatApplication {
             String passwordEncoder = new BCryptPasswordEncoder().encode("abc123");
             String passwordEncoder2 = new BCryptPasswordEncoder().encode("asd456");
 
-            User user = new User("FirstUser",passwordEncoder, "user123@email.com");
-            User user2 = new User("User2", passwordEncoder2, "userqwe@email.com");
-
-            UserInfo newUserInfo = new UserInfo();
-            UserInfo newUserInfo2 = new UserInfo();
-            newUserInfo.setUser(user);
-            newUserInfo2.setUser(user2);
-
             UserRole userRole1 = new UserRole();
             UserRole userRole2 = new UserRole();
-
             userRole1.setRole("Admin");
             userRole2.setRole("User");
 
-            user.setRoles(Collections.singleton(userRole1));
-            user.setEnable(true);
-
-            user2.setRoles(Collections.singleton(userRole1));
-            user2.setEnable(true);
-
-            UserRelationship userRelationship = new UserRelationship();
-            userRelationship.setUser(user);
-            userRelationship.setFriend(user2);
-            userRelationship.setRelatedAt(LocalDateTime.now());
-            userRelationship.setStatus(RelationshipStatus.ACCEPTED);
+            if (!userRoleRepo.existsUserRoleByRole(userRole1.getRole()) && !userRoleRepo.existsUserRoleByRole(userRole2.getRole())) {
+                userRoleRepo.save(userRole1);
+                userRoleRepo.save(userRole2);
+            } else {
+                System.out.println("Role: " + userRole1.getRole() + ", " + userRole2.getRole() + "are already exists.");
+            }
 
 
-            user.setRelationshipInitiated(List.of(userRelationship));
-            user2.setRelationshipReceived(List.of(userRelationship));
+            User user = new User("FirstUser",passwordEncoder, "user123@email.com");
+            User user2 = new User("User2", passwordEncoder2, "userqwe@email.com");
 
-            userRoleRepo.save(userRole1);
-            userRoleRepo.save(userRole2);
+            if (!userRepo.existsByUsernameOrEmail(user.getUsername(), user.getEmail()) && !userRepo.existsByUsernameOrEmail(user2.getUsername(), user2.getEmail())) {
+                UserInfo newUserInfo = new UserInfo();
+                UserInfo newUserInfo2 = new UserInfo();
+                newUserInfo.setUser(user);
+                newUserInfo2.setUser(user2);
 
-            userRepo.saveAll(List.of(user, user2));
-            userInfoRepo.saveAll(List.of(newUserInfo, newUserInfo2));
-            userRelatonRepo.saveAll(List.of(userRelationship));
+
+
+
+
+                user.setRoles(Collections.singleton(userRole1));
+                user.setEnable(true);
+
+                user2.setRoles(Collections.singleton(userRole1));
+                user2.setEnable(true);
+
+                UserRelationship userRelationship = new UserRelationship();
+                userRelationship.setUser(user);
+                userRelationship.setFriend(user2);
+                userRelationship.setRelatedAt(LocalDateTime.now());
+                userRelationship.setStatus(RelationshipStatus.ACCEPTED);
+
+
+                user.setRelationshipInitiated(List.of(userRelationship));
+                user2.setRelationshipReceived(List.of(userRelationship));
+
+                userRepo.saveAll(List.of(user, user2));
+                userInfoRepo.saveAll(List.of(newUserInfo, newUserInfo2));
+                userRelatonRepo.saveAll(List.of(userRelationship));
+            } else {
+                System.out.println("User with username '" + user.getUsername() + ", " + user2.getUsername() + "' already exists. Skipping.");
+            }
         };
     }
 

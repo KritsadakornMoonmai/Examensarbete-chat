@@ -114,7 +114,7 @@
 </head>
 <body>
 <div class="chat-container" th:fragment="content">
-  <div class="head-bar" th:if="${chatRoom.chatRoomTypes == chatRoomTypes.PRIVATE}" th:text="${sender.userDtoMin.username} +', '+${senderFriend.userDtoMin.username}"></div>
+  <div class="head-bar" th:if="${chatRoom.chatRoomTypes == chatRoomTypes.PRIVATE}" th:text="${senderFriend.userDtoMin.username}"></div>
   <div class="head-bar" th:if="${chatRoom.chatRoomTypes == chatRoomTypes.GROUP}" th:text="${chatRoom.getName()}"></div>
   <div class="chatbox-container">
     <div class="chat-display" id="chat-display">
@@ -143,20 +143,35 @@
       <label for="chat-input"></label>
       <input type="text" id="chat-input" placeholder="Type a message..." required />
       <button class="chat-button" type="submit">Send</button>
-      <button th:if="${chatRoom.chatRoomTypes == chatRoomTypes.GROUP}" class="chat-button" onclick="showPopup('memberListForm')">Members</button>
-      <div id="memberListForm" style="min-width: 50vh">
-        <h5>Members: </h5>
-        <hr>
-        <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
-          <p th:text="${member.getMemberName()}"></p>
-          <!--<button th:if="${sender.roles == roles.ADMIN}" class="request-btn" type="button">remove</button>-->
-        </div>
-        <!--<button th:if="${sender.roles == roles.ADMIN}" class="request-btn" type="button">Add</button>-->
-        <button class="request-btn" type="button" onclick="hidePopup('memberListForm')">Close</button>
-      </div>
     </form>
+    <button th:if="${chatRoom.chatRoomTypes == chatRoomTypes.GROUP}" class="chat-button" onclick="showPopup('memberListForm')">Members</button>
+    <div id="memberListForm" style="min-width: 50vh">
+      <h5>Members: </h5>
+      <hr>
+      <div th:each="member : ${chatRoom.getChatRoomMemberDtoMins()}">
+        <p th:text="${member.getMemberName()}"></p>
+        <form th:action="@{/api/chatroom/delete}" method="post">
+          <input type="hidden" name="chatRoomId" th:value="${chatRoom?.getId() ?: 0}">
+          <input type="hidden" name="chatRoomMemberId" th:value="${member?.getId() ?: 0}">
+
+          <button th:if="${sender.roles == roles.ADMIN && sender.id != member.id}" class="request-btn" type="submit">remove</button>
+        </form>
+      </div>
+
+
+      <button class="request-btn" type="button" onclick="hidePopup('memberListForm')">Close</button>
+    </div>
+    <input type="hidden" id="user-chat-id" th:value="${sender.userDtoMin.id}">
+    <input type="hidden" id="chat-id" th:value="${chatRoom.id}">
+    <button th:if="${sender.roles == roles.ADMIN}" class="chat-button" type="button" onclick="fetchList(); showPopup('addMemberForm')">Add</button>
+    <div id="addMemberForm" class="chat-button">
+      <h5>Select one of your friend</h5>
+      <hr>
+      <div id="friendsListContainer">
+      </div>
+      <button class="request-btn" type="button" onclick="hidePopup('addMemberForm')">Close</button>
+    </div>
   </div>
 </div>
 </body>
-<script></script>
 </html>

@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, Long> {
-    public ChatRoomMember findChatRoomMemberByUserId(UUID id);
 
     public List<ChatRoomMember> findChatRoomMembersByUserId(UUID id);
+
+    public ChatRoomMember findChatRoomMemberByIdAndChatRoom_Id(Long id, Long chatRoomId);
+
+    public ChatRoomMember findChatRoomMemberByChatRoom_IdAndUser_Id(Long chatRoomId, UUID userId);
 }

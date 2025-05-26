@@ -91,6 +91,26 @@ public class ChatRoomService {
         return chatRoom;
     }
 
+    public boolean removeChatRoomMemberFromChatRoom(Long chatRoomId, Long chatRoomMemberId){
+        Optional<ChatRoom> chatRoom = chatRoomRepo.findById(chatRoomId);
+        Optional<ChatRoomMember> chatRoomMember = chatRoomMemberRepo.findById(chatRoomMemberId);
+
+        if (chatRoom.isEmpty() || chatRoomMember.isEmpty()) {
+            return false;
+        } else if (chatRoom.get().getId() != chatRoomMember.get().getChatRoom().getId()) {
+            return false;
+        } else {
+            chatRoomMemberRepo.delete(chatRoomMember.get());
+            return true;
+        }
+    }
+
+    public void removeChatRoom(Long chatRoomId) {
+        Optional<ChatRoom> chatRoom = chatRoomRepo.findById(chatRoomId);
+
+        chatRoom.ifPresent(chatRoomRepo::delete);
+    }
+
     public ChatRoomDto createChatRoom(List<ChatRoomMemberDto> chatRoomMemberList, ChatRoomTypes chatRoomTypes) {
         LocalDateTime current = LocalDateTime.now();
         ChatRoomDto chatRoom;
@@ -125,7 +145,6 @@ public class ChatRoomService {
 
     public ChatRoomDto saveChatRoom(ChatRoomDto chatRoomDto, List<ChatRoomMember> chatRoomMember) {
         ChatRoom newChatRoom = getChatRoomFromDto(chatRoomDto, chatRoomMember);
-        System.out.println("newChatRoom saving " + newChatRoom.getName());
         return getChatRoomDto(chatRoomRepo.save(newChatRoom));
     }
 

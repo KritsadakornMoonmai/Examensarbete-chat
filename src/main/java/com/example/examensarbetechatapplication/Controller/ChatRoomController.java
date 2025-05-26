@@ -1,24 +1,22 @@
 package com.example.examensarbetechatapplication.Controller;
 
 import com.example.examensarbetechatapplication.DTO.*;
-import com.example.examensarbetechatapplication.Model.ChatRoomMember;
-import com.example.examensarbetechatapplication.Model.ChatRoomTypes;
-import com.example.examensarbetechatapplication.Model.Roles;
+import com.example.examensarbetechatapplication.Model.*;
 import com.example.examensarbetechatapplication.Service.ChatRoomMemberService;
 import com.example.examensarbetechatapplication.Service.ChatRoomService;
 import com.example.examensarbetechatapplication.Service.MessageService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/api/chatroom")
@@ -161,6 +159,7 @@ public class ChatRoomController {
                     .findFirst()
                     .orElse(null);
 
+            model.addAttribute("user", userDto.get());
             model.addAttribute("chatRoom", chatRoomDto.get());
             model.addAttribute("messages", messageDtos);
             model.addAttribute("sender", Objects.requireNonNull(sender));
@@ -173,7 +172,6 @@ public class ChatRoomController {
     @PostMapping("/createGroup")
     public String createChatRoomGroup(@RequestParam UUID userId, @RequestParam String memberIds, @RequestParam String type, @RequestParam String roomName, Model model) {
         ChatRoomTypes chatRoomTypes;
-        System.out.println("memberIds: "+memberIds);
         List<UUID> memberIdLists = new ArrayList<>(Arrays.stream(memberIds.split(","))
                 .map(UUID::fromString)
                 .toList());
@@ -190,7 +188,6 @@ public class ChatRoomController {
         List<UserDtoMin> userDtoMins = new ArrayList<>();
 
         for (UUID memberId : memberIdLists) {
-            System.out.println("memberIds in list: "+memberId);
             Optional<UserDtoMin> userDto = Optional.ofNullable(userService.getUserDtoMinById(memberId));
             if (userDto.isEmpty()) {
                 model.addAttribute("errorMessage", "User does not exist");
@@ -270,6 +267,106 @@ public class ChatRoomController {
         ChatRoomDto newChatRoomDto = chatRoomService.createChatRoom(chatRoomMemberDtos, chatRoomTypes);
         model.addAttribute("chatRoomGroup", newChatRoomDto);
         return "redirect:/user/login/success";
+    }
+
+    @PostMapping("/delete")
+    public String deleteMemberFromChatRoom(Model model, @RequestParam Long chatRoomId, @RequestParam Long chatRoomMemberId) {
+        boolean isDeleted = chatRoomService.removeChatRoomMemberFromChatRoom(chatRoomId, chatRoomMemberId);
+        Optional<ChatRoomDto> chatRoomDto = Optional.ofNullable(chatRoomService.getChatRoomDtoById(chatRoomId));
+
+        if (chatRoomDto.isEmpty()) {
+            model.addAttribute("isDeleted", false);
+            System.out.println("Is empty " + isDeleted);
+            return "redirect:/user/login/success";
+        } else if (!isDeleted) {
+            model.addAttribute("isDeleted", false);
+            System.out.println("Is deleted " + isDeleted);
+            return "redirect:/user/login/success";
+        } else {
+            if (chatRoomDto.get().getChatRoomMemberDtoMins().size() < 2) {
+                chatRoomService.removeChatRoom(chatRoomId);
+                System.out.println("Is deleted and removed " + isDeleted);
+                model.addAttribute("IsDeleted", true);
+                return "redirect:/user/login/success";
+            } else {
+                model.addAttribute("IsDeleted", true);
+                System.out.println("Is deleted " + isDeleted);
+                return "redirect:/user/login/success";
+            }
+
+        }
+    }
+
+    @GetMapping("/invite")
+    @ResponseBody
+    public List<UserDtoMin> invitation(@RequestParam UUID userId, @RequestParam Long chatRoomId) {
+        Optional<UserDto> userDto = Optional.ofNullable(userService.getUserDtoById(userId));
+        Optional<ChatRoomDto> chatRoomDto = Optional.ofNullable(chatRoomService.getChatRoomDtoById(chatRoomId));
+        List<UserRelationshipDto> allAcceptedRelationships;
+
+
+        if (userDto.isEmpty() || chatRoomDto.isEmpty()) {
+            return null;
+        } else {
+            //Optional<ChatRoomMemberDto> getChatMember = Optional.ofNullable(chatRoomMemberService.getChatMemberByChatRoomAndMember(chatRoomId, chatRoomMemberId));
+                    allAcceptedRelationships = Stream.concat(
+                                    userDto.get().getRelationshipInitiatedDtos().stream(),
+                                    userDto.get().getRelationshipReceivedDtos().stream()
+                            ).filter(rel -> rel.getStatus() == RelationshipStatus.ACCEPTED)
+                            .toList();
+
+            List<UserDtoMin> actualFriends = allAcceptedRelationships.stream()
+                    .map(rel -> {
+
+                        if (userDto.get().getId().equals(rel.getUser().getId())) {
+                            return rel.getFriend();
+                        } else {
+                            return rel.getUser();
+                        }
+                    })
+                    .distinct()
+                    .toList();
+
+
+
+            return actualFriends.stream().filter(userDtoMin -> {
+                Optional<ChatRoomMemberDto> members = Optional.ofNullable(chatRoomMemberService.getMemberByUserAndChatRoom(chatRoomDto.get().getId(), userDtoMin.getId()));
+                return members.isEmpty();
+            }).toList();
+        }
+    }
+
+    @PostMapping("/invite")
+    public ResponseEntity<String> invitationSuccession(@RequestBody Map<String, Object> payload) {
+        long chatRoomId = Long.parseLong((String) payload.get("chatRoomId"));
+        UUID friendId = UUID.fromString((String) payload.get("friendId"));
+        String friendUsername = (String) payload.get("friendUsername");
+
+        Optional<ChatRoomMemberDto> fetchMember = Optional.ofNullable(chatRoomMemberService.getMemberByUserAndChatRoom(chatRoomId, friendId));
+        Optional<UserDto> fetchFriend = Optional.ofNullable(userService.getUserDtoByUsername(friendUsername));
+        if (fetchFriend.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(friendUsername + " doesn't exist");
+        } else if (fetchMember.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Member " + fetchMember.get().getUserDtoMin().getUsername() + " is already joined");
+        } else {
+            ChatRoomDto fetchChatRoom = chatRoomService.getChatRoomDtoById(chatRoomId);
+            UserDtoMin fetchUserMini = userService.getUserDtoMinById(fetchFriend.get().getId());
+            ChatRoomMemberDto newMember = chatRoomMemberService.createChatRoomMember(fetchUserMini, Roles.MEMBER);
+            List<ChatRoomMemberDto> chatRoomMemberDtos = new ArrayList<>(fetchChatRoom.getChatRoomMemberDtoMins()
+                    .stream()
+                    .map(chatRoomMemberDtoMin -> chatRoomMemberService.getChatRoomMemberDtoById(chatRoomMemberDtoMin.getId()))
+                    .toList());
+            chatRoomMemberDtos.add(newMember);
+            newMember.setMessageDtoMins(new ArrayList<>());
+
+
+
+            chatRoomService.saveChatRoom(fetchChatRoom, chatRoomMemberDtos.stream().map(chatRoomMemberDto -> chatRoomMemberService.getChatRoomMemberFromDto(chatRoomMemberDto)).toList());
+
+            return ResponseEntity.ok("User invited successfully");
+        }
     }
 }
 

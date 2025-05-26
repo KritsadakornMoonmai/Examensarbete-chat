@@ -127,7 +127,7 @@ input[type="text"] {
     color: #1f5b83;
 }
 
-#addGroupChatForm, #memberListForm, #decisionPopUps {
+#addGroupChatForm, #memberListForm, #decisionPopUps, #addMemberForm {
     display: none;
     position: fixed;
     top: 20%;

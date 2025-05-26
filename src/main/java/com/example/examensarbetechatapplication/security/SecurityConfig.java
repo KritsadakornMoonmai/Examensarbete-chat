@@ -59,7 +59,7 @@ public class SecurityConfig {
         http
                 .addFilterBefore(recaptchaValidationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/",  "/js/**", "/css/**", "/images/**", "/login/**", "/user/login", "/logout","/queues/**", "/user/register", "/api/user/create", "/reset-password").permitAll()
+                        .requestMatchers("/",  "/js/**", "/css/**", "/images/**", "/login/**", "/user/login", "/logout","/queues/**", "/user/register", "/api/user/create").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

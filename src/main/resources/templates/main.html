@@ -353,15 +353,6 @@
 
 
 
-            if (chatRoomId != null && currentChatRoomId === chatRoomId.toString()) {
-                console.log("ccID: " + currentChatRoomId + "rcId: " + chatRoomId.toString());
-                mainChat.innerHTML = '<p class="blank-space-message">Find a friend to talk with :)</p>';
-                mainChat.setAttribute('data-current-chatroom-id', '');
-                return;
-            }
-
-
-
             const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
@@ -391,6 +382,12 @@
                         throw new Error("Required inputs are missing in the fetched chat content");
                     }
 
+                    if (newChatRoomId !== 0 && currentChatRoomId === newChatRoomId.toString()) {
+                        mainChat.innerHTML = '<p class="blank-space-message">Find a friend to talk with :)</p>';
+                        mainChat.setAttribute('data-current-chatroom-id', '');
+                        return;
+                    }
+
                     // Update global variables
                     chatRoomId = parseInt(newChatRoomId, 10);
                     senderId = parseInt(newSenderId, 10);
@@ -412,8 +409,6 @@
             return;
         }
 
-        // Proceed with your logic
-        console.log('Found .main-chat:', mainChat);
     });
 </script>
 <script>

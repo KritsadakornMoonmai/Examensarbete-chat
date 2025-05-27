@@ -11,6 +11,7 @@ import com.example.examensarbetechatapplication.Repository.UserInfoRepository;
 import com.example.examensarbetechatapplication.Repository.UserRelationshipRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
 import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
+import com.example.examensarbetechatapplication.SecurityConfigTest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,9 +39,9 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@Import(SecurityConfigTest.class)
 class UserInfoServiceTest {
 
     @Autowired
@@ -57,21 +59,16 @@ class UserInfoServiceTest {
     @Mock
     private UserRelationshipRepository userRelationshipRepository;
 
-
     @Autowired
-    @InjectMocks
     private UserInfoService userInfoService;
 
     @Autowired
-    @InjectMocks
     private UserService userService;
 
     @Autowired
-    @InjectMocks
     private UserRelationshipService userRelationshipService;
 
     @Autowired
-    @InjectMocks
     private ChatRoomMemberService chatRoomMemberService;
 
     long id1 = 1L;
@@ -127,8 +124,7 @@ class UserInfoServiceTest {
                 , userRelationshipService
                 , chatRoomMemberService);
 
-        /*when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
+
         when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
         when(userRepository.saveAll(anyList())).thenReturn(userLists);
@@ -139,7 +135,7 @@ class UserInfoServiceTest {
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
         when(userInfoRepository.findAll()).thenReturn(userInfoList);
 
-        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);*/
+        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
     }
 
     @Test

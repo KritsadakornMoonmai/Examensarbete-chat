@@ -34,6 +34,7 @@ public class ExamensarbeteChatApplication {
     }
 
     @Bean
+    @Profile("!test")
     public CommandLineRunner runner(UserRepository userRepo,
                                     UserRelationshipRepository userRelatonRepo,
                                     UserInfoRepository userInfoRepo,

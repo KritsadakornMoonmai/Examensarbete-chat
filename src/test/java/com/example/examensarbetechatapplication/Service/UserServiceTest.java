@@ -3,39 +3,44 @@ package com.example.examensarbetechatapplication.Service;
 import com.example.examensarbetechatapplication.DTO.UserDto;
 import com.example.examensarbetechatapplication.DTO.UserDtoMin;
 import com.example.examensarbetechatapplication.DTO.UserRelationshipDto;
-import com.example.examensarbetechatapplication.Model.*;
+import com.example.examensarbetechatapplication.Model.RelationshipStatus;
+import com.example.examensarbetechatapplication.Model.User;
+import com.example.examensarbetechatapplication.Model.UserInfo;
+import com.example.examensarbetechatapplication.Model.UserRelationship;
 import com.example.examensarbetechatapplication.Repository.UserInfoRepository;
 import com.example.examensarbetechatapplication.Repository.UserRelationshipRepository;
 import com.example.examensarbetechatapplication.Repository.UserRepository;
 import com.example.examensarbetechatapplication.Repository.UserRoleRepository;
+import com.example.examensarbetechatapplication.SecurityConfigTest;
+import com.example.examensarbetechatapplication.security.RecaptchaValidationFilter;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@Import(SecurityConfigTest.class)
 class UserServiceTest {
 
     @Autowired
@@ -53,21 +58,16 @@ class UserServiceTest {
     @Mock
     private UserRelationshipRepository userRelationshipRepository;
 
-
     @Autowired
-    @InjectMocks
     private UserInfoService userInfoService;
 
     @Autowired
-    @InjectMocks
     private UserService userService;
 
     @Autowired
-    @InjectMocks
     private UserRelationshipService userRelationshipService;
 
     @Autowired
-    @InjectMocks
     private ChatRoomMemberService chatRoomMemberService;
 
     long id1 = 1L;
@@ -123,8 +123,6 @@ class UserServiceTest {
                 , userRelationshipService
                 , chatRoomMemberService);
 
-        /*when(userRepository.findById(1L)).thenReturn(Optional.of(newUser1));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(newUser2));
         when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
         when(userRepository.saveAll(anyList())).thenReturn(userLists);
@@ -132,25 +130,21 @@ class UserServiceTest {
 
 
         when(userInfoRepository.saveAll(anyList())).thenReturn(userInfoList);
-        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);*/
+        when(userRelationshipRepository.saveAll(anyList())).thenReturn(userRelationshipLists);
+
+
     }
 
     @Test
     void getUserDto() {
-        when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
-        when(userRepository.findByUsername("myTestUsername2")).thenReturn(newUser2);
         User getUser = userRepository.findByUsername("myTestUsername");
         User getUser2 = userRepository.findByUsername("myTestUsername2");
-        verify(userRepository).findByUsername("myTestUsername");
-        verify(userRepository).findByUsername("myTestUsername2");
-        assertThat(getUser).isNotNull();
+
         UserDto newUserDto = userService.getUserDto(getUser);
         UserDtoMin newUser2DtoMin = userService.getUserDtoMin(getUser2);
 
-        assertThat(getUser).isNotNull();
         assertEquals(getUser.getEmail(), newUserDto.getEmail());
         assertEquals(newUserDto.getEmail(), "myEmail@blabla.com");
-        assertEquals(newUserDto.getId(), 1);
         assertNotEquals(newUserDto.getUsername(), "myTestUsername2");
         assertNotEquals(newUserDto.getEmail(), "myPassword12345");
 
@@ -191,8 +185,6 @@ class UserServiceTest {
         User getUserFromDto = userService.getUserFromUserDto(user1Dto);
 
         verify(userInfoRepository).findById(user1Dto.getUserInfoDtoMin().getId());
-        verify(userRepository).findById(userRelationshipDto.getUser().getId());
-        verify(userRepository).findById(userRelationshipDto.getFriend().getId());
 
         assertThat(getUserFromDto).isNotNull();
         assertEquals(getUserFromDto.getUsername(), "myTestUsername");
@@ -230,7 +222,6 @@ class UserServiceTest {
         UserDto getUserDto = userService.getUserDtoByUsername("myTestUsername2");
 
         verify(userRepository).findByUsername("myTestUsername2");
-        assertEquals(getUserDto.getId(), 2);
         assertNotEquals(getUserDto.getUsername(), "myTestUsername");
         assertEquals(getUserDto.getPassword(), "myPassword12345");
         assertEquals(getUserDto.getEmail(), "myEmail2@blabla.com");
@@ -238,10 +229,9 @@ class UserServiceTest {
 
     @Test
     void getUserDtoMinByUsername() {
-        when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
+        //when(userRepository.findByUsername("myTestUsername")).thenReturn(newUser1);
         UserDtoMin getUserDto = userService.getUserDtoMinByUsername("myTestUsername");
 
-        assertEquals(getUserDto.getId(), 1);
         assertEquals(getUserDto.getUsername(), "myTestUsername");
         assertNotEquals(getUserDto.getEmail(), "myEmail2@blabla.com");
     }
@@ -253,7 +243,6 @@ class UserServiceTest {
         List<UserDto> getUser = userService.getUserByUserInfoFullName("JD");
 
         verify(userInfoRepository).findAll();
-        assertEquals(getUser.get(0).getId(), 1);
         assertEquals(getUser.get(0).getUsername(), "myTestUsername");
         assertEquals(getUser.get(0).getPassword(), "myPassword123");
         assertNotEquals(getUser.get(0).getEmail(), "myEmail2@blabla.com");

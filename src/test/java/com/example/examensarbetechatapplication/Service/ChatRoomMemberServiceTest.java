@@ -4,16 +4,17 @@ import com.example.examensarbetechatapplication.DTO.ChatRoomMemberDto;
 import com.example.examensarbetechatapplication.DTO.ChatRoomMemberDtoMin;
 import com.example.examensarbetechatapplication.Model.*;
 import com.example.examensarbetechatapplication.Repository.*;
+import com.example.examensarbetechatapplication.SecurityConfigTest;
+import com.example.examensarbetechatapplication.security.RecaptchaValidationFilter;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,16 +26,14 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@Import(SecurityConfigTest.class)
 class ChatRoomMemberServiceTest {
 
     @Autowired
@@ -59,14 +58,16 @@ class ChatRoomMemberServiceTest {
     private ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Autowired
-    @InjectMocks
     private MessageService messageService;
+
     @Autowired
-    @InjectMocks
     private ChatRoomService chatRoomService;
+
     @Autowired
-    @InjectMocks
     private ChatRoomMemberService chatRoomMemberService;
+
+    @Mock
+    private RecaptchaValidationFilter recaptchaValidationFilter;
 
     long id1 = 1L;
     long id2 = 2L;

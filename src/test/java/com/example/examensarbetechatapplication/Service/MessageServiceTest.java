@@ -6,6 +6,7 @@ import com.example.examensarbetechatapplication.DTO.MessageDto;
 import com.example.examensarbetechatapplication.DTO.MessageDtoMin;
 import com.example.examensarbetechatapplication.Model.*;
 import com.example.examensarbetechatapplication.Repository.*;
+import com.example.examensarbetechatapplication.SecurityConfigTest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,9 +35,9 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@Import(SecurityConfigTest.class)
 class MessageServiceTest {
 
     @Autowired
@@ -60,13 +62,10 @@ class MessageServiceTest {
     private ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Autowired
-    @InjectMocks
     private MessageService messageService;
     @Autowired
-    @InjectMocks
     private ChatRoomService chatRoomService;
     @Autowired
-    @InjectMocks
     private ChatRoomMemberService chatRoomMemberService;
 
     long id1 = 1L;

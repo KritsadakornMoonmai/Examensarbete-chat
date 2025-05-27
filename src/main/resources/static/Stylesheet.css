@@ -68,12 +68,18 @@
     color: black;
 }
 
-#chat-form #request-form {
+#chat-form, .request-form {
     display: flex;
     padding: 0.5rem;
-    border-top: 1px solid #ccc;
-    background-color: #0b1219;
+    border-top: 1px solid #0b1219;
+    background-color: #111;
     flex-shrink: 0;
+}
+
+.request-form .req-rel-btn {
+    background-color: #1f5b83;
+    border-style: hidden;
+    font-size: larger;
 }
 
 #chat-input #search-input {
@@ -255,5 +261,21 @@ input[type="text"] {
 
 .memberList button {
     justify-content: flex-end;
+    margin-left: auto;
+}
+
+.chat-panel {
+    display: flex;
+}
+
+.chat-panel .message-input-form {
+    justify-content: flex-start;
+}
+
+.chat-panel .chatroom-info-sections {
+    border-top: 1px solid #ccc;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    align-content: center;
     margin-left: auto;
 }

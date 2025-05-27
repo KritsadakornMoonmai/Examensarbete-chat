@@ -8,9 +8,11 @@ import com.example.examensarbetechatapplication.Service.UserInfoService;
 import com.example.examensarbetechatapplication.Service.UserRelationshipService;
 import com.example.examensarbetechatapplication.Service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -78,8 +82,9 @@ public class SecurityConfig {
         return http.build();
     }
 
+
     @Bean
-    @Profile("!test")
+    @ConditionalOnProperty(name = "recaptcha.enabled", havingValue = "true", matchIfMissing = true)
     public RecaptchaValidationFilter recaptchaValidationFilter() {
         return new RecaptchaValidationFilter();
     }

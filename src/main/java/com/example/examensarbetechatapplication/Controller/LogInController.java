@@ -12,6 +12,7 @@ import com.example.examensarbetechatapplication.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -34,8 +35,12 @@ public class LogInController {
     final private ChatRoomService chatRoomService;
     final private ChatRoomMemberService chatRoomMemberService;
 
+    @Value("${google.recaptcha.site}")
+    private String recaptchaSite;
+
     @GetMapping("/login/")
-    public String userLogin() {
+    public String userLogin(Model model) {
+        model.addAttribute("sk", recaptchaSite);
         return "login";
     }
 

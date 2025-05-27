@@ -106,7 +106,7 @@
                     <span th:text="${status}" class="alert-warning"></span>
                 </div>
                 <div>
-                    <div class="g-recaptcha" data-sitekey="6LdWwUErAAAAAKssIuWf_5ziTthMMEOAnH96wKXc"></div>
+                    <div class="g-recaptcha" th:data-sitekey="${sk}"></div>
                     <button class="logging-btn" type="submit">Log in</button>
                 </div>
 

@@ -16,13 +16,11 @@ This project is a Web application development built during my thesis project fro
 Build and design web application development
 
 ## Tech stack
- - Java
- - Spring Boot
- - HTML
- - CSS
- - JavaScript
- - Thymeleaf
- - MySql
+- **Backend:** Java, Spring Boot, Spring Data JPA, Spring Security
+- **Frontend:** Thymeleaf, Bootstrap, HTML5/CSS3
+- **Database:** MySQL
+- **Build & Tools:** Maven, JUnit, IntelliJ IDEA
+- **DevOps:** CI/CD pipeline(github actions)
 
 
 

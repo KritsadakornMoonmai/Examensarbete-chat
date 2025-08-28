@@ -2,7 +2,7 @@
 Chat Web Application
 
 ## Overview
-This project is a Web application development built during my thesis project from a Higher Vocational Education school. Its purpose is to under stand how the chat in actual life works, and complete my hobby project from summer.
+This project is a Web application development built during my thesis project from a Higher Vocational Education school. Its purpose is to understand how the chat in actual life works, improves my knowledge about full-stack web application, and complete my hobby project from summertime.
 
 ## Features
 - Real-time chat using WebSockets
